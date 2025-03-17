@@ -1,0 +1,58 @@
+.homePageContainer {
+    background-size: cover;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    overflow-y: auto;
+    left: 0;
+    top: 0;
+    background-image: url('/src/static/images/sample_gradient.webp');
+
+    .uploadVideoPanel {
+        margin-top: 100px;
+        background: white;
+        border-radius: 10px;
+        width: 800px;
+        max-width: 100%;
+        padding: 48px;
+        height: fit-content;
+        -webkit-box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12) !important;
+        box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12) !important;
+
+        .uploadeVideoPanelTitle {
+            line-height: 1.2;
+            font-weight: 900;
+            font-size: 3.5rem;
+            color: rgba(0, 0, 0, .87);
+        }
+
+        .uploadVideoDropOverlay {
+            margin: 7px;
+            height: calc(100% - 14px);
+            border-radius: 3px;
+            border: 1px dashed #dfdfdf;
+            width: 484px;
+            height: 186px;
+
+            .uploadVideoInput {
+                display: none;
+            }
+
+            .uploadVideoTitle {
+                font-size: 17px;
+                line-height: 1.35;
+                font-weight: 500;
+                color: #000;
+                margin-top: 15px;
+                margin-bottom: 5px;
+                text-align: inline-start;
+                padding: 0 15px;
+
+                .uploadVideoLink {
+                    color:rgba(34,117,215,.9);
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}

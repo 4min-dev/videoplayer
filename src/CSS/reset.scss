@@ -1,0 +1,38 @@
+*,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'system-ui', sans-serif !important;
+}
+
+.flex {
+    display: flex;
+}
+
+.column {
+    flex-direction: column;
+}
+
+.align__center {
+    align-items: center;
+}
+
+.align__end {
+    align-items: flex-end;
+}
+
+.justify__center {
+    justify-content: center;
+}
+
+.justify__space__between {
+    justify-content: space-between;
+}
+
+.flex__wrap {
+    flex-wrap: wrap;
+}
+
+.text__center {
+    text-align: center;
+}
