@@ -63,7 +63,7 @@ const Home: React.FC = () => {
                         style={{ display: 'none' }}
                     />
                     <span className={styles.uploadVideoTitle}>
-                        Drop files here or&nbsp
+                        Drop files here or&nbsp;
                         <label htmlFor="uploadVideoInput" className={styles.uploadVideoLink}>
                             browse files
                         </label>
