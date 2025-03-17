@@ -12,8 +12,8 @@
         margin-top: 100px;
         background: white;
         border-radius: 10px;
-        width: 800px;
-        max-width: 100%;
+        width: 100%;
+        max-width: 800px;
         padding: 48px;
         height: fit-content;
         -webkit-box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12) !important;
@@ -24,15 +24,31 @@
             font-weight: 900;
             font-size: 3.5rem;
             color: rgba(0, 0, 0, .87);
+
+            @media (min-width: 0px) and (max-width: 540px) {
+                font-size: 1.75em;
+            }
         }
 
         .uploadVideoDropOverlay {
-            margin: 7px;
             height: calc(100% - 14px);
-            border-radius: 3px;
-            border: 1px dashed #dfdfdf;
+            border-radius: 5px;
             width: 484px;
+            border: 1px solid #eaeaea;
             height: 186px;
+
+            .inside {
+                border: 1px dashed #dfdfdf;
+                margin: 7px;
+                height: calc(100% - 14px);
+                width: 100%;
+                border-radius: 3px;
+            }
+
+            @media (min-width:0px) and (max-width:540px) {
+                width: calc(322px - 2px);
+                height: calc(186px - 2px);
+            }
 
             .uploadVideoInput {
                 display: none;
@@ -49,9 +65,103 @@
                 padding: 0 15px;
 
                 .uploadVideoLink {
-                    color:rgba(34,117,215,.9);
+                    color: rgba(34, 117, 215, .9);
                     cursor: pointer;
+                    text-underline-offset: 2px;
+
+                    @media (min-width:1024px) {
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+    .aboutVideoContent {
+        gap: 16px;
+        width: 100%;
+
+        .namedInput {
+            gap: 5px;
+            width: 100%;
+            
+            @media (min-width:0px) and (max-width:540px) {
+                margin-top: 10px;
+                gap:0px;
+            }
+
+            .inputName {
+                font-weight: bold;
+                font-size: 1.3em;
+                color: rgba(0, 0, 0, .87);
+            }
+
+            .input {
+                padding: 0px 10px;
+                border-radius: 3px;
+                background: #f2f2f2;
+                height: 3em;
+                line-height: 2.5em;
+                outline: none;
+                border: none;
+                margin: 5px auto;
+                max-width: 550px;
+                width: 100%;
+                color: rgba(0, 0, 0, .87);
+
+                @media (min-width:0px) and (max-width:540px) {
+                    height: 2.5em;
+                    font-size: 1em;
+                    max-height: 35px;
+                }
+            }
+        }
+
+        .continueButton {
+            will-change: box-shadow;
+            font-size: 15px;
+            height: 44px;
+            padding: 0 32px;
+            webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            border-radius: 2px;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-flex: 0;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            font-size: 14px;
+            font-weight: 500;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            margin: 6px 8px;
+            min-width: 88px;
+            outline: 0;
+            text-decoration: none;
+            -webkit-transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
+            transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
+            position: relative;
+            vertical-align: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            background-color: #424242 !important;
+            background-color: #424242 !important;
+            border: none;
+            color: #fff;
+            outline: none;
+            cursor: pointer;
+
+            &:disabled {
+                background-color: rgba(0, 0, 0, .12) !important;
+                color: rgba(0, 0, 0, .26) !important;
+                cursor: default;
             }
         }
     }
