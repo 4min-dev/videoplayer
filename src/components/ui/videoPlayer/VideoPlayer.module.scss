@@ -1,0 +1,53 @@
+@keyframes pulse_v1 {
+    70% {
+        transform: scale(1);
+    }
+
+    80% {
+        transform: scale(0.9);
+    }
+
+    90% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.videoPlayer {
+    height: 100%;
+
+    .playButton {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        translate: -40% -50%;
+        background: rgb(27, 155, 243);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+        outline: none;
+        border: none;
+        animation: pulse_v1 2500ms infinite ease-in-out alternate;
+        animation-delay: 1s !important;
+
+        img {
+            position: absolute;
+            z-index: 2;
+            object-fit: cover;
+            height: auto;
+            width: 70%;
+            cursor: pointer;
+            left: 55%;
+            transform: translateX(-50%);
+        }
+    }
+
+    video {
+        height: 100%;
+        cursor: pointer;
+    }
+}

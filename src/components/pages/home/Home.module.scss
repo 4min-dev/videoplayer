@@ -118,51 +118,5 @@
                 }
             }
         }
-
-        .continueButton {
-            will-change: box-shadow;
-            font-size: 15px;
-            height: 44px;
-            padding: 0 32px;
-            webkit-box-align: center;
-            -ms-flex-align: center;
-            align-items: center;
-            border-radius: 2px;
-            display: -webkit-inline-box;
-            display: -ms-inline-flexbox;
-            display: inline-flex;
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 auto;
-            flex: 0 0 auto;
-            font-size: 14px;
-            font-weight: 500;
-            -webkit-box-pack: center;
-            -ms-flex-pack: center;
-            justify-content: center;
-            margin: 6px 8px;
-            min-width: 88px;
-            outline: 0;
-            text-decoration: none;
-            -webkit-transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
-            transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
-            position: relative;
-            vertical-align: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            background-color: #424242 !important;
-            background-color: #424242 !important;
-            border: none;
-            color: #fff;
-            outline: none;
-            cursor: pointer;
-
-            &:disabled {
-                background-color: rgba(0, 0, 0, .12) !important;
-                color: rgba(0, 0, 0, .26) !important;
-                cursor: default;
-            }
-        }
     }
 }

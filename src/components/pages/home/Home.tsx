@@ -44,54 +44,72 @@ const Home: React.FC = () => {
         }
     }
 
-    function handleVideoTitle(event: React.ChangeEvent<HTMLInputElement>) {
+    const handleVideoTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
         setVideoTitle(event.target.value)
+    }
+
+    const handleContinue = () => {
+        if (selectedFile && videoTitle) {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const base64String = reader.result as string
+
+                localStorage.setItem('videoFile', base64String)
+                localStorage.setItem('videoTitle', videoTitle)
+
+                window.location.href = '/editor'
+            }
+            reader.readAsDataURL(selectedFile)
+        }
     }
 
     return (
         <div className={`flex justify__center ${styles.homePageContainer}`}>
             <div className={`flex column align__center ${styles.uploadVideoPanel}`}>
                 <span className={styles.uploadeVideoPanelTitle}>
-                    {
-                        !selectedFile ? 'New Video' : 'Add Title'
-                    }
+                    {!selectedFile ? 'New Video' : 'Add Title'}
                 </span>
-                {
-                    !selectedFile ? (
-                        <div
-                            className={`flex align__center justify__center ${styles.uploadVideoDropOverlay} ${isDragging ? styles.dragging : ''
-                                }`}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
+                {!selectedFile ? (
+                    <div
+                        className={`flex align__center justify__center ${styles.uploadVideoDropOverlay} ${isDragging ? styles.dragging : ''
+                            }`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                    >
+                        <div className={`flex align__center justify__center ${styles.inside}`}>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                className={styles.uploadVideoInput}
+                                id="uploadVideoInput"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                            <span className={styles.uploadVideoTitle}>
+                                Drop files here or&nbsp;
+                                <label htmlFor="uploadVideoInput" className={styles.uploadVideoLink}>
+                                    browse files
+                                </label>
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className={`flex align__center column ${styles.aboutVideoContent}`}>
+                        <div className={`flex column align__center ${styles.namedInput}`}>
+                            <span className={styles.inputName}>Video Title</span>
+                            <input type="text" className={styles.input} onChange={handleVideoTitle} />
+                        </div>
+                        <button
+                            disabled={!videoTitle}
+                            type="button"
+                            className={styles.continueButton}
+                            onClick={handleContinue}
                         >
-                            <div className={`flex align__center justify__center ${styles.inside}`}>
-                                <input
-                                    type="file"
-                                    accept="video/*"
-                                    className={styles.uploadVideoInput}
-                                    id="uploadVideoInput"
-                                    onChange={handleFileChange}
-                                    style={{ display: 'none' }}
-                                />
-                                <span className={styles.uploadVideoTitle}>
-                                    Drop files here or&nbsp;
-                                    <label htmlFor="uploadVideoInput" className={styles.uploadVideoLink}>
-                                        browse files
-                                    </label>
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className={`flex align__center column ${styles.aboutVideoContent}`}>
-                            <div className={`flex column align__center ${styles.namedInput}`}>
-                                <span className={styles.inputName}>Video Title</span>
-                                <input type='text' className={styles.input} onChange={handleVideoTitle} />
-                            </div>
-                            <button disabled={!videoTitle} type='button' className={styles.continueButton}>Continue</button>
-                        </div>
-                    )
-                }
+                            Continue
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )
