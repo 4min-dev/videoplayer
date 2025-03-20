@@ -1,0 +1,90 @@
+.videoPlayerPanel {
+    position: absolute;
+    bottom: 4px;
+    left: 36px;
+    right: 36px;
+
+    .videoPlayerTimelineWrapper {
+        position: relative;
+        width: 100%;
+        height: 10px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, .8);
+
+        .videoPlayerTimeline {
+            position: absolute;
+            border-radius: inherit;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            background: white;
+            opacity: 1;
+            max-width: 94% !important;
+            width: 100px;
+            z-index: 22;
+
+            &::before {
+                top: 50%;
+                transform: translateY(-50%);
+                height: 24px;
+                width: 24px;
+                border-radius: 50%;
+                border: 1px solid rgba(0, 0, 0, 0.3);
+                z-index: 1;
+                position: absolute;
+                right: 0px;
+                background-color: #fff;
+                content: '';
+                display: inline-block;
+            }
+        }
+    }
+
+    .videoPlayerTimelineControls {
+        height: 60px;
+        margin-left: 12px;
+        margin-right: 12px;
+
+        button {
+            outline: none;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        .videoPlayterTimelineControlButtons {
+            gap: 24px;
+
+            .playbackValueContainer {
+                gap: 6px;
+                color: white;
+                font-size: 1.2em;
+                font-weight: bold;
+                vertical-align: top;
+            }
+        }
+
+        .addCommentInput {
+            position: absolute;
+            left:50%;
+            transform: translateX(-50%);
+            height: 30px;
+            border: 2px solid white;
+            font-size: 1em;
+            width: 90%;
+            max-width: 160px;
+            border-radius: 15px;
+            padding: 0px 10px;
+            outline: none;
+            background:none;
+            color:white;
+
+            &::placeholder {
+                font-size: inherit;
+                color:inherit;
+                text-align: center;
+            }
+        }
+    }
+}

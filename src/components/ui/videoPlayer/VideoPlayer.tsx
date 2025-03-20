@@ -1,22 +1,28 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, MutableRefObject, Ref } from 'react'
 import styles from './VideoPlayer.module.scss'
 import getImage from '../../../assets/getImage'
 
 type TVideoPlayer = {
-    videoUrl: string
+    videoUrl: string,
+    playVideo: (videoRef: HTMLVideoElement) => void,
+    pauseVideo: (videoRef: HTMLVideoElement) => void,
+    videoRef: React.RefObject<HTMLVideoElement>
 }
 
-const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl }) => {
+const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl, playVideo, pauseVideo, videoRef }) => {
     const [isVideoStarted, setVideoStarted] = useState<boolean>(false)
-    const videoRef = useRef<HTMLVideoElement | null>(null)
 
     const handlePlayClick = () => {
         if (!isVideoStarted) {
             setVideoStarted(true)
             if (videoRef.current) {
                 videoRef.current.currentTime = 0
-                videoRef.current.play()
                 videoRef.current.muted = false
+                playVideo(videoRef.current)
+            }
+        } else {
+            if (videoRef.current) {
+                videoRef.current.paused ? playVideo(videoRef.current) : pauseVideo(videoRef.current)
             }
         }
     }
@@ -31,8 +37,6 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl }) => {
                 videoRef.current.currentTime = 0
             }
         }
-
-        videoRef.current.play()
     }
 
     useEffect(() => {
@@ -59,6 +63,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl }) => {
                 src={videoUrl}
                 autoPlay
                 muted
+                onEnded={() => playVideo(videoRef.current!)}
                 onTimeUpdate={handleTimeUpdate}
                 onClick={handlePlayClick}
             />
