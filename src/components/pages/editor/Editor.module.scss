@@ -26,6 +26,10 @@
     height: 100vh;
     overflow-y: scroll;
 
+    &.fullScreen {
+        overflow-y: hidden;
+    }
+
     .videoControlsPanel {
         border-left: 1px solid rgba(0, 0, 0, 0.1);
         height: 100%;

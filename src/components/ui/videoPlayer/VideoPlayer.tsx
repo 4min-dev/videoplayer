@@ -6,12 +6,12 @@ type TVideoPlayer = {
     videoUrl: string,
     playVideo: (videoRef: HTMLVideoElement) => void,
     pauseVideo: (videoRef: HTMLVideoElement) => void,
-    videoRef: React.RefObject<HTMLVideoElement>
+    videoRef: React.RefObject<HTMLVideoElement>,
+    isVideoStarted:boolean,
+    setVideoStarted:React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl, playVideo, pauseVideo, videoRef }) => {
-    const [isVideoStarted, setVideoStarted] = useState<boolean>(false)
-
+const VideoPlayer: React.FC<TVideoPlayer> = ({ videoUrl, playVideo, pauseVideo, videoRef, isVideoStarted, setVideoStarted }) => {
     const handlePlayClick = () => {
         if (!isVideoStarted) {
             setVideoStarted(true)
