@@ -19,9 +19,9 @@
             font-size: 1.4em;
             pointer-events: none;
             top: calc(70% - 20px);
-            
+
             &.fullScreen {
-                top:calc(90% - 20px);
+                top: calc(90% - 20px);
             }
         }
 
@@ -69,12 +69,55 @@
         .videoPlayterTimelineControlButtons {
             gap: 24px;
 
+            .muteButtonContainer {
+                width: 36px;
+                overflow: hidden;
+                gap: 26px;
+
+                &.hovered {
+                    width: fit-content;
+                }
+            }
+
             .playbackValueContainer {
+                position: relative;
+                right: 4px;
                 gap: 6px;
                 color: white;
                 font-size: 1.2em;
                 font-weight: bold;
                 vertical-align: top;
+            }
+
+            .soundLineContainer {
+                position: relative;
+                height: 2px;
+                width: 75px;
+                background: black;
+
+                .soundLineControlThumb {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    bottom: 0;
+                    height: 100%;
+                    background: #fff;
+                    transition: width 0.1s ease;
+
+                    .soundLineControlCorner {
+                        position: absolute;
+                        right: 0px;
+                        top: 50%;
+                        transform: translate(50%, -50%);
+                        width: 16px;
+                        height: 16px;
+                        background: white;
+                        border-radius: 50%;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        cursor: pointer;
+                        user-select: none;
+                    }
+                }
             }
         }
 
