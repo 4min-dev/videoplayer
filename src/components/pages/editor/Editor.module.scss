@@ -1,5 +1,6 @@
 .asidePanelHeadingContainer {
     gap: 16px;
+    width: 100%;
 
     .asidePanelTitleContainer {
         gap: 16px;
@@ -10,10 +11,266 @@
             font-weight: bold;
             color: rgba(0, 0, 0, .87)
         }
+
+        .asidePanelPauseCheckboxContainer {
+            gap: 12px;
+
+            input {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background: transparent;
+                border: 2px solid black;
+                border-radius: 4px;
+                outline: none;
+                width: 24px;
+                height: 24px;
+                cursor: pointer;
+
+                &:checked {
+                    appearance: auto;
+                    -webkit-appearance: auto;
+                    -moz-appearance: auto;
+                    background-color: #ffffff;
+                    border-color: black;
+                }
+            }
+
+            label {
+                color: rgba(0, 0, 0, 0.7) !important;
+                font-size: 16px;
+                cursor: pointer;
+            }
+        }
     }
 
     .asidePanelDescription {
         font-size: 1.25em;
+    }
+
+    .interactionCardsContainer {
+        width: 100%;
+
+        .interactionCard {
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            padding: 10px 10px 10px 20px;
+            width: 100%;
+            justify-content: space-between;
+            cursor: pointer;
+
+            &:hover {
+                background: #fffff0
+            }
+
+            .aboutInteractionCard {
+                gap: 48px;
+
+                .interactionCardMainUi {
+                    gap: 8px;
+
+                    .duration,
+                    .interactionType {
+                        color: black;
+                    }
+
+                    .duration {
+                        font-size: 1.25em;
+                    }
+
+                    .interactionType {
+                        font-size: 1.05em;
+                    }
+                }
+
+                .interactionCardMainAbout {
+                    gap: 8px;
+
+                    .interactionTitle {
+                        font-size: 1.25em;
+                        color: black;
+                    }
+
+                    .interactionTypesContainer {
+                        gap: 8px;
+
+                        .interactionType {
+                            font-weight: 400;
+                            padding: 4px 5px;
+                            border-radius: 3px;
+                            font-size: .8em;
+
+                        }
+                    }
+                }
+            }
+
+            .interactionButtonContainer {
+                margin-right: 10px;
+                height: fit-content;
+
+                .interactionButton {
+                    order: 1;
+                    margin-right: 10px;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .currentInteractionWrapper {
+        .currentInteractionHeading {
+            width: 100%;
+
+            .currentInteractionHeadingCard {
+                width: 100%;
+
+                .currentInteractionHeadingCardTitle {
+                    font-size: 1.6em;
+                    color: #000000DE;
+                    font-weight: bold;
+                }
+
+                .currentInteractionHeadingCardValue {
+                    color: #333333;
+                    font-weight: 700;
+                    font-size: 1.6em;
+                }
+
+                .currentInteractionHeadingCardDescription {
+                    font-size: 0.8em;
+                    color: rgb(66, 66, 66);
+                }
+            }
+        }
+
+        .currentInteractionInputContainer,
+        .currentInteractionSelectAction {
+            gap: 8px;
+            width: calc(100% - 32px);
+
+            button {
+                outline: none;
+                border: none;
+                background: none;
+            }
+
+            &.currentInteractionSelectAction {
+                margin-top: 24px;
+                margin-bottom: 16px;
+            }
+
+            .currentInteractionInputName,
+            .currentInteractionSelecterTitle {
+                font-size: 1.25em;
+                color: rgba(0, 0, 0, .87);
+                font-weight: 400;
+            }
+
+            .currentInteractionInput,
+            .currentInteractionSelectActionSelecter {
+                resize: none;
+                overflow: hidden;
+                margin: 0px auto;
+                width: 100%;
+                background: white;
+                border: 1px solid rgba(60, 60, 60, 0.26);
+                border-radius: 3px;
+                color: black;
+                outline: none;
+
+                &.main {
+                    height: 43px;
+                    padding: 5px;
+                    font-size: 1.5em;
+                }
+
+                &.actionRelative {
+                    padding: 2px 7px;
+                    font-size: 14px;
+                }
+
+                &.actionChild {
+                    padding: 2px 7px;
+                    height: calc(26px - 4px);
+                    font-size: .80em;
+                }
+            }
+        }
+
+        .uiSettingsContainer {
+            gap: 8px;
+            margin-top: 12px;
+
+            .uiSettingsButton {
+                border: 1px solid;
+                font-size: 13px;
+                height: 20px;
+                padding: 0px 14px;
+                font-weight: 500;
+                color: #424242 !important;
+                caret-color: #424242 !important;
+                border-radius: 28px;
+            }
+        }
+
+        .buttonsContainer {
+            .saveButton {
+                font-size: 15px;
+                height: 44px;
+                padding: 0 32px;
+                border-radius: 2px;
+                min-width: 88px;
+                background-color: #424242 !important;
+                font-weight: 500;
+                color: white;
+                outline: none;
+                transform: scale(1.25);
+                margin-top: 24px;
+                border: none;
+                cursor: pointer;
+            }
+
+            .saveAndAddAnotherButton {
+                padding: 16px 16px 8px 16px;
+                outline: none;
+                border: none;
+                background: none;
+                height: fit-content;
+                border-radius: 2px;
+                font-size: 14px;
+                font-weight: 500;
+                min-width: 88px;
+                transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
+                color: #424242 !important;
+                caret-color: #424242 !important;
+                cursor: pointer;
+
+                &:hover {
+                    background: rgba(66, 66, 66, .1)
+                }
+            }
+
+            .discardChangesButton {
+                transition: .3s cubic-bezier(.25, .8, .5, 1), color 1ms;
+                font-size: 15px;
+                height: 44px;
+                outline: none;
+                border: none;
+                background: none;
+                font-weight: 500;
+                margin-top: 8px;
+                padding: 0 32px;
+                border-radius: 2px;
+                min-width: 88px;
+                color: #f44336 !important;
+                caret-color: #f44336 !important;
+                cursor: pointer;
+
+                &:hover {
+                    background: rgba(66, 66, 66, .1)
+                }
+            }
+        }
     }
 }
 
@@ -23,6 +280,7 @@
 
 .editorVideoWrapper {
     width: 100%;
+    max-width: 65vw;
     height: 100vh;
     overflow-y: scroll;
 
@@ -70,34 +328,51 @@
                     background: rgba(0, 0, 0, 0.1);
                 }
             }
+        }
 
-            .controlButtonHint {
-                font-size: .9rem;
-                color: white;
-                background: black;
-                width: fit-content;
-                left:50%;
-                transform: translateX(-50%);
-                padding: 4px 12px;
-                border-radius: 10px;
-                position: relative;
-                margin-top: 10px;
-                opacity: 0;
-                width: fit-content;
-                white-space: nowrap;
-                transition: opacity .2s;
+        .currentInteractionControlsPanel {
+            width: calc(100% - (85px * 2));
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 80px;
 
-                &::after {
-                    content: '';
-                    position: absolute;
-                    top: -6px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 0;
-                    height: 0;
-                    border-left: 6px solid transparent;
-                    border-right: 6px solid transparent;
-                    border-bottom: 6px solid black;
+            .currentInteractionControlsPanelCard {
+                gap: 4px;
+
+                .currentInteractionControlsPanelCardTitle {
+                    font-size: 1.25em;
+                    color: rgba(0, 0, 0, 0.87);
+                    line-height: 1.5;
+                }
+
+                .currentInteractionControlsPanelCardUi {
+                    border: 1px solid #ccc;
+                    height: 30px;
+                    user-select: none;
+
+                    .amountButton {
+                        width: 30px;
+                        line-height: 28px;
+                        background: #f1f1f1;
+                        color: #444;
+                        cursor: pointer;
+                        height: inherit;
+                        outline: none;
+                        border: none;
+                    }
+
+                    .currentAmount {
+                        height: fit-content;
+                        width: 70px;
+                        padding: 0 12px;
+                        vertical-align: top;
+                        text-align: center;
+                        outline: none;
+                        font-size: 1em;
+                        color: rgba(0, 0, 0, .87);
+                        border: none;
+                        background: none;
+                    }
                 }
             }
         }

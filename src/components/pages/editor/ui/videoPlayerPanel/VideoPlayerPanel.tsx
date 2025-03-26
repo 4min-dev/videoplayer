@@ -15,7 +15,8 @@ type TVideoPlayerPanel = {
     pauseVideo: (videoRef: HTMLVideoElement) => void
     videoRef: React.RefObject<HTMLVideoElement>
     handleFullscreenToggle: () => void
-    isFullscreen: boolean
+    isFullscreen: boolean,
+    handleSetTimestampButton:(timeStamp: { start: string, end: string }) => void
 }
 
 const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
@@ -25,6 +26,7 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     videoRef,
     handleFullscreenToggle,
     isFullscreen,
+    handleSetTimestampButton
 }) => {
     const [isMuteHovered, setIsMuteHovered] = useState<boolean>(false)
     const [isMuted, setIsMuted] = useState<boolean>(false)
@@ -41,11 +43,12 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     const [isDragging, setIsDragging] = useState(false)
 
     const formatTime = (timeInSeconds: number): string => {
-        if (isNaN(timeInSeconds)) return "00:00"
+        if (isNaN(timeInSeconds)) return "00:20"
         const minutes = Math.floor(timeInSeconds / 60)
         const seconds = Math.floor(timeInSeconds % 60)
         return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
     }
+
 
     const handleLoadedMetadata = () => {
         if (videoRef.current) {
@@ -60,10 +63,12 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
         if (videoRef.current && !isDraggingRef.current) {
             const currentTime = videoRef.current.currentTime
             const duration = videoRef.current.duration
+
             setPlayback((prev) => ({
                 ...prev,
                 current: formatTime(currentTime),
             }))
+
             const progressPercentage = (currentTime / duration) * 100
             setProgress(isNaN(progressPercentage) ? 0 : progressPercentage)
         }
@@ -157,6 +162,8 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
 
     useEffect(() => {
         if (videoRef.current) {
+            handleLoadedMetadata()
+
             videoRef.current.addEventListener("loadedmetadata", handleLoadedMetadata)
             videoRef.current.addEventListener("timeupdate", handleTimeUpdate)
             return () => {
@@ -215,6 +222,13 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
             videoRef.current.volume = volume
         }
     }, [volume])
+
+    useEffect(() => {
+        handleSetTimestampButton({
+            start:playBack.current,
+            end:playBack.total
+        })
+    }, [playBack])
 
     return (
         <div className={`flex column ${styles.videoPlayerPanel}`}>

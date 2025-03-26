@@ -1,15 +1,16 @@
 .asidePanel {
-    padding: 32px 40px;
+    padding: 32px 0px;
     max-height: 100vh;
-    background-color: white;
+    background:white;
+    width: 100%;
+    min-width: 35vw;
+    max-width: 35vw;
     overflow-y: scroll;
 }
 
 .asidePanel::-webkit-scrollbar {
     width: 20px;
 }
-
-
 
 .asidePanel::-webkit-scrollbar-button:start {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z" fill="rgba(0, 0, 0, 0.4)"/></svg>');
