@@ -8,10 +8,11 @@ type TTooltipButton = {
     children:React.ReactNode,
     buttonClassname?:string,
     wrapperClassname?:string,
+    tooltipClassname?:string,
     handleMouseClick?:(props?:any) => void
 }
 
-const TooltipButton: React.FC<TTooltipButton> = ({ position, tooltip, children, buttonClassname, wrapperClassname, handleMouseClick }) => {
+const TooltipButton: React.FC<TTooltipButton> = ({ position, tooltip, children, buttonClassname, wrapperClassname, tooltipClassname, handleMouseClick }) => {
 
     const [isTooltipVisible, setTooltipVisible] = useState<boolean>(false)
 
@@ -29,7 +30,7 @@ const TooltipButton: React.FC<TTooltipButton> = ({ position, tooltip, children, 
                 {children}
             </div>
 
-            <div className={`flex align__center justify__center ${styles.tooltip} ${isTooltipVisible ? styles.visible : ''}`}>
+            <div className={`flex align__center justify__center ${styles.tooltip} ${isTooltipVisible ? styles.visible : ''} ${tooltipClassname}`}>
                 {tooltip}
             </div>
         </div>

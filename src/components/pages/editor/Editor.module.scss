@@ -2,6 +2,10 @@
     gap: 16px;
     width: 100%;
 
+    * {
+        user-select: none;
+    }
+
     .asidePanelTitleContainer {
         gap: 16px;
 
@@ -124,6 +128,46 @@
             .currentInteractionHeadingCard {
                 width: 100%;
 
+                .timestampValueContainer {
+                    width: fit-content;
+
+                    .leftControlButtonTooltip {
+                        top: 30px;
+                        left: 110px;
+                    }
+
+                    .rightControlButtonTooltip {
+                        top: 30px;
+                        left: 25px;
+                    }
+
+                    .timestampControlButton {
+                        position: absolute;
+                        width: fit-content;
+                        cursor: pointer;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        z-index: 20;
+                        background: rgba(40, 40, 118, 0.1);
+                        border: 2px solid #000000DE;
+                        border-radius: 1000px;
+                        padding: 4px;
+
+
+                        &.minusButton {
+                            right: 0;
+                        }
+
+                        &.plusButton {
+                            left: 14px;
+                        }
+                    }
+
+                    .currentInteractionHeadingCardValue {
+                        margin-left: 15px;
+                    }
+                }
+
                 .currentInteractionHeadingCardTitle {
                     font-size: 1.6em;
                     color: #000000DE;
@@ -139,7 +183,51 @@
                 .currentInteractionHeadingCardDescription {
                     font-size: 0.8em;
                     color: rgb(66, 66, 66);
+                    user-select: none;
                 }
+            }
+        }
+
+        .selectorContainer {
+            position: relative;
+            width: calc(100% - 16px);
+            right:-8px;
+
+            .selectorWrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                resize: none;
+                overflow: hidden;
+                background: white;
+                border-right: 1px solid rgba(60, 60, 60, 0.26);
+                border-left: 1px solid rgba(60, 60, 60, 0.26);
+                border-bottom: 1px solid rgba(60, 60, 60, 0.26);
+                z-index: 223;
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
+                padding-left: 7px;
+                position: absolute;
+                bottom: -9px;
+                left: 0;
+                right: 0;
+                height: 25px;
+                opacity: 0;
+                transition: opacity .4s;
+
+                &.active {
+                    opacity: 1;
+                }
+
+                .selector {
+                    cursor: pointer;
+                    width: 100%;
+                }
+            }
+
+            .currentInteractionInputContainer,
+            .currentInteractionSelectAction {
+                width:  calc(100% - 16px);
             }
         }
 
@@ -185,8 +273,11 @@
                 }
 
                 &.actionRelative {
+                    position: relative;
                     padding: 2px 7px;
                     font-size: 14px;
+                    z-index: 50;
+                    cursor: pointer;
                 }
 
                 &.actionChild {

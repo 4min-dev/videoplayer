@@ -27,8 +27,20 @@ type TInteraction = {
     tooltip: string
 }
 
+type TButtonTimestamp = {
+    startTime: string | null,
+    endTime: string | null,
+    total: string | null
+}
+
+type TActionData = {
+    id: number,
+    title: string,
+    actionHandler: () => void
+}
+
 const Editor: React.FC = () => {
-    const [buttonTimestamp, setButtonTimestamp] = useState<{ startTime: string | null, endTime: string | null }>({ startTime: null, endTime: null })
+    const [buttonTimestamp, setButtonTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [videoUrl, setVideoUrl] = useState<string | null>(null)
     const [asideTitle, setAsideTitle] = useState<string>('Interactions')
     const [controlsData, setControlsData] = useState<TControlButton[]>([
@@ -109,6 +121,14 @@ const Editor: React.FC = () => {
         bottom: '200'
     })
     const [buttonTitle, setButtonTitle] = useState<string>('')
+    const [isActionSelector, setIsActionSelector] = useState<boolean>(false)
+    const [actionsData, setActionsData] = useState<TActionData[]>([
+        {
+            id: 1,
+            title: 'Continue',
+            actionHandler: () => setIsActionSelector(false)
+        }
+    ])
 
     const handleFullscreenToggle = () => {
         if (isFullscreen) {
@@ -207,8 +227,90 @@ const Editor: React.FC = () => {
     function handleSetTimestampButton(timeStamp: { start: string, end: string }) {
         setButtonTimestamp({
             startTime: timeStamp.start,
-            endTime: timeStamp.end
+            endTime: timeStamp.end,
+            total: timeStamp.end
         })
+    }
+
+    function handleTimestampForward(timeline: 'start' | 'end') {
+        setButtonTimestamp((prev: TButtonTimestamp) => {
+            if (!prev.startTime || !prev.endTime) {
+                console.error('Start or End time is not defined')
+                return prev
+            }
+
+            if (timeline === 'start') {
+                const newStartTime = convertToSeconds(prev.startTime) + 1
+                if (newStartTime > convertToSeconds(prev.endTime)) {
+                    console.warn('Start time cannot be greater than end time')
+                    return prev
+                }
+                return {
+                    ...prev,
+                    startTime: convertToTimeString(newStartTime),
+                }
+            } else {
+                const newEndTime = convertToSeconds(prev.endTime) + 1
+                const totalTime = convertToSeconds(prev.total!)
+
+                if (buttonTimestamp.total && newEndTime > totalTime) {
+                    console.warn('End time cannot exceed total video duration')
+                    return prev
+                }
+
+                return {
+                    ...prev,
+                    endTime: convertToTimeString(newEndTime),
+                }
+            }
+        })
+    }
+
+
+    function handleTimestampBack(timeline: 'start' | 'end') {
+        setButtonTimestamp((prev) => {
+            if (!prev.startTime || !prev.endTime) {
+                console.error('Start or End time is not defined')
+                return prev
+            }
+
+            if (timeline === 'start') {
+                const newStartTime = convertToSeconds(prev.startTime) - 1
+                if (newStartTime < 0) {
+                    console.warn('Start time cannot be less than 0 seconds')
+                    return prev
+                }
+                return {
+                    ...prev,
+                    startTime: convertToTimeString(newStartTime),
+                }
+            } else {
+                const newEndTime = convertToSeconds(prev.endTime) - 1
+                if (newEndTime < convertToSeconds(prev.startTime)) {
+                    console.warn('End time cannot be less than start time')
+                    return prev
+                }
+                return {
+                    ...prev,
+                    endTime: convertToTimeString(newEndTime),
+                }
+            }
+        })
+    }
+
+    function convertToSeconds(time: string): number {
+        const [minutes, seconds] = time.split(':').map(Number)
+        return minutes * 60 + seconds
+    }
+
+    function convertToTimeString(seconds: number): string {
+        const minutes = Math.floor(seconds / 60)
+        const remainingSeconds = seconds % 60
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+    }
+
+    function handleSelectorClick() {
+        setIsActionSelector((prev) => !prev)
     }
 
     return (
@@ -228,7 +330,7 @@ const Editor: React.FC = () => {
                                         <div className={`flex column ${styles.asidePanelTitleContainer}`}>
                                             <span className={styles.asidePanelTitle}>{`Add ${currentInteraction.value}`}</span>
                                             <div className={`flex align__center ${styles.asidePanelPauseCheckboxContainer}`}>
-                                                <input type='checkbox' id='pauseCheckbox'/>
+                                                <input type='checkbox' id='pauseCheckbox' />
                                                 <label htmlFor='pauseCheckbox'>
                                                     Pause for {currentInteraction.value}
                                                 </label>
@@ -248,9 +350,20 @@ const Editor: React.FC = () => {
                                                     Show Time
                                                 </span>
 
-                                                <span className={styles.currentInteractionHeadingCardValue}>
-                                                    {buttonTimestamp.startTime}
-                                                </span>
+                                                <div className={`flex ${styles.timestampValueContainer}`}>
+                                                    <TooltipButton position='bottom' tooltip='Back 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.minusButton}`} tooltipClassname={styles.leftControlButtonTooltip} handleMouseClick={() => handleTimestampBack('start')}>
+                                                        <FontAwesomeIcon icon={faMinus} style={{ width: '10px', height: '10px' }} />
+                                                    </TooltipButton>
+
+                                                    <span className={styles.currentInteractionHeadingCardValue}>
+                                                        {buttonTimestamp.startTime}
+                                                    </span>
+
+                                                    <TooltipButton position='bottom' tooltip='Forward 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.plusButton}`} tooltipClassname={styles.rightControlButtonTooltip} handleMouseClick={() => handleTimestampForward('start')}>
+                                                        <FontAwesomeIcon icon={faPlus} style={{ width: '10px', height: '10px' }} />
+                                                    </TooltipButton>
+                                                </div>
+
                                                 <span className={styles.currentInteractionHeadingCardDescription}>
                                                     Set to start
                                                 </span>
@@ -261,9 +374,20 @@ const Editor: React.FC = () => {
                                                     Hide Time
                                                 </span>
 
-                                                <span className={styles.currentInteractionHeadingCardValue}>
-                                                    {buttonTimestamp.endTime}
-                                                </span>
+                                                <div className={`flex ${styles.timestampValueContainer}`}>
+                                                    <TooltipButton position='bottom' tooltip='Back 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.minusButton}`} tooltipClassname={styles.leftControlButtonTooltip} handleMouseClick={() => handleTimestampBack('end')}>
+                                                        <FontAwesomeIcon icon={faMinus} style={{ width: '10px', height: '10px' }} />
+                                                    </TooltipButton>
+
+                                                    <span className={styles.currentInteractionHeadingCardValue}>
+                                                        {buttonTimestamp.endTime}
+                                                    </span>
+
+                                                    <TooltipButton position='bottom' tooltip='Forward 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.plusButton}`} tooltipClassname={styles.rightControlButtonTooltip} handleMouseClick={() => handleTimestampForward('end')}>
+                                                        <FontAwesomeIcon icon={faPlus} style={{ width: '10px', height: '10px' }} />
+                                                    </TooltipButton>
+                                                </div>
+
                                                 <span className={styles.currentInteractionHeadingCardDescription}>
                                                     Set to end
                                                 </span>
@@ -278,19 +402,35 @@ const Editor: React.FC = () => {
                                             <input type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Button Text' onChange={handleButtonTitleChange} />
                                         </div>
 
-                                        <div className={`flex column align__center ${styles.currentInteractionSelectAction}`}>
-                                            <span className={styles.currentInteractionInputName}>
-                                                Click Action
-                                            </span>
-
-                                            <div className={`flex align__center justify__space__between ${styles.actionRelative} ${styles.currentInteractionSelectActionSelecter}`}>
-                                                <span className={styles.currentInteractionSelecterTitle}>
-                                                    Open Link
+                                        <div className={`flex column ${styles.selectorContainer}`}>
+                                            <div className={`flex column align__center ${styles.currentInteractionSelectAction}`}>
+                                                <span className={styles.currentInteractionInputName}>
+                                                    Click Action
                                                 </span>
 
-                                                <button type='button' className={styles.currentInteractionSelecterButton}>
-                                                    <FontAwesomeIcon style={{ width: '16', height: '16' }} icon={faChevronDown} />
-                                                </button>
+                                                <div className={`flex align__center justify__space__between ${styles.actionRelative} ${styles.currentInteractionSelectActionSelecter}`} onClick={handleSelectorClick}>
+                                                    <span className={styles.currentInteractionSelecterTitle}>
+                                                        Open Link
+                                                    </span>
+
+                                                    <button type='button' className={styles.currentInteractionSelecterButton}>
+                                                        <FontAwesomeIcon style={{ width: '16', height: '16' }} icon={faChevronDown} />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+
+                                            <div className={`flex column ${styles.selectorWrapper} ${isActionSelector ? styles.active : ''}`}>
+                                                {
+                                                    actionsData.length > 0 ? actionsData.map((action: TActionData) => (
+                                                        <div className={styles.selector} key={action.id} onClick={action.actionHandler}>
+                                                            {
+                                                                action.title
+                                                            }
+                                                        </div>
+                                                    ))
+                                                        : <h3>Не найдено</h3>
+                                                }
                                             </div>
                                         </div>
 
@@ -452,34 +592,6 @@ const Editor: React.FC = () => {
                                                 type="button"
                                                 className={styles.amountButton}
                                                 onClick={() => handleValueChange('top', 1)}
-                                            >
-                                                <FontAwesomeIcon icon={faPlus} />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className={`flex column align__center ${styles.currentInteractionControlsPanelCard}`}>
-                                        <span className={styles.currentInteractionControlsPanelCardTitle}>
-                                            Bottom
-                                        </span>
-                                        <div className={`flex align__center ${styles.currentInteractionControlsPanelCardUi}`}>
-                                            <button
-                                                type="button"
-                                                className={styles.amountButton}
-                                                onClick={() => handleValueChange('bottom', -1)}
-                                            >
-                                                <FontAwesomeIcon icon={faMinus} />
-                                            </button>
-                                            <input
-                                                value={String(buttonProps.bottom)}
-                                                type="text"
-                                                className={styles.currentAmount}
-                                                readOnly
-                                            />
-                                            <button
-                                                type="button"
-                                                className={styles.amountButton}
-                                                onClick={() => handleValueChange('bottom', 1)}
                                             >
                                                 <FontAwesomeIcon icon={faPlus} />
                                             </button>
