@@ -18,7 +18,8 @@ type TVideoPlayer = {
     setButtonProps: React.Dispatch<React.SetStateAction<{ left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }>>,
     buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
     buttonStyle: IStyleColor[],
-    isDrawing: boolean
+    isDrawing: boolean,
+    newComment:string
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -32,7 +33,8 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     setButtonProps,
     buttonProps,
     buttonStyle,
-    isDrawing
+    isDrawing,
+    newComment
 }) => {
     const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 })
     const [buttonSize, setButtonSize] = useState({ width: 88, height: 56 })
@@ -350,6 +352,13 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     return (
         <div className={`flex align__center justify__center ${styles.videoPlayer}`}>
             <div className={styles.videoWrapper} ref={wrapperRef}>
+                {
+                    newComment !== '' && (
+                        <span className={styles.newComment}>
+                           {newComment}
+                        </span>
+                    )
+                }
                 <canvas
                     ref={canvasRef}
                     className={styles.drawingCanvas}

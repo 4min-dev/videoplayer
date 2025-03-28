@@ -2,12 +2,15 @@ import React, { useEffect, useState, useRef } from 'react'
 import styles from './VideoPlayerPanel.module.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+    faComment,
     faExpand,
     faPause,
     faPlay,
     faVolumeHigh,
     faVolumeMute,
 } from '@fortawesome/free-solid-svg-icons'
+import IButtonTimestamp from '../../../../../interfaces/IButtonTimestamp'
+import IInteraction from '../../../../../interfaces/IInteraction'
 
 type TVideoPlayerPanel = {
     isVideoPaused: boolean
@@ -16,7 +19,11 @@ type TVideoPlayerPanel = {
     videoRef: React.RefObject<HTMLVideoElement>
     handleFullscreenToggle: () => void
     isFullscreen: boolean,
-    handleSetTimestampButton:(timeStamp: { start: string, end: string }) => void
+    handleSetTimestampButton: (timeStamp: { start: string, end: string }) => void,
+    handleChangeAddComment: (event: React.ChangeEvent<HTMLInputElement>) => void,
+    handleAddCommentInteraction: (interaction: IInteraction) => void,
+    commentTimestamp: IButtonTimestamp,
+    newComment: string
 }
 
 const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
@@ -26,7 +33,11 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     videoRef,
     handleFullscreenToggle,
     isFullscreen,
-    handleSetTimestampButton
+    handleSetTimestampButton,
+    handleChangeAddComment,
+    handleAddCommentInteraction,
+    commentTimestamp,
+    newComment
 }) => {
     const [isMuteHovered, setIsMuteHovered] = useState<boolean>(false)
     const [isMuted, setIsMuted] = useState<boolean>(false)
@@ -193,7 +204,7 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
 
         const rect = wrapper.getBoundingClientRect()
         const clickPosition = e.clientX - rect.left
-        const newVolume = Math.min(Math.max(clickPosition / rect.width , 0), 1)
+        const newVolume = Math.min(Math.max(clickPosition / rect.width, 0), 1)
 
         setVolume(newVolume)
     }
@@ -225,8 +236,8 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
 
     useEffect(() => {
         handleSetTimestampButton({
-            start:playBack.current,
-            end:playBack.total
+            start: playBack.current,
+            end: playBack.total
         })
     }, [playBack])
 
@@ -305,6 +316,21 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                 <input
                     className={`flex align__center justify__center ${styles.addCommentInput}`}
                     placeholder="Add Comment"
+                    value={newComment}
+                    onChange={handleChangeAddComment}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault()
+                            handleAddCommentInteraction({
+                                id: Date.now(),
+                                duration: commentTimestamp.startTime!,
+                                title: newComment,
+                                icon: faComment,
+                                type: 'Comment',
+                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${commentTimestamp.endTime}`
+                            })
+                        }
+                    }}
                 />
                 <button type="button" className={styles.fullscreenButton} onClick={handleFullscreenToggle}>
                     <FontAwesomeIcon size="2x" icon={faExpand} color="white" />

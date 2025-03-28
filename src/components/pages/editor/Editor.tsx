@@ -6,7 +6,7 @@ import EditorVideoOverlay from './ui/videoOverlay/VideoOverlay'
 import PrimaryButton from '../../ui/buttons/primaryButton/PrimaryButton'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHandPointUp, faImage, faQuestionCircle, faSun } from '@fortawesome/free-regular-svg-icons'
-import { IconDefinition, faBolt, faChevronDown, faFont, faMinus, faPen, faPlay, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
+import { IconDefinition, faBolt, faChevronDown, faComment, faFont, faMinus, faPen, faPlay, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import TooltipButton from '../../ui/buttons/tooltipButton/TooltipButton'
 import ICurrentInteraction from '../../../interfaces/ICurrentInteraction'
 import IStyleColor from '../../../interfaces/IStyleColor'
@@ -15,6 +15,7 @@ import rgbaToString from '../../../assets/rgbaToString'
 import IInteraction from '../../../interfaces/IInteraction'
 import IButtonProps from '../../../interfaces/IButtonProps'
 import InteractionCard from './InteractionCard'
+import IButtonTimestamp from '../../../interfaces/IButtonTimestamp'
 
 type TControlButton = {
     id: number,
@@ -22,12 +23,6 @@ type TControlButton = {
     title: string,
     hint: string,
     handler: (interaction: ICurrentInteraction) => void
-}
-
-type TButtonTimestamp = {
-    startTime: string | null,
-    endTime: string | null,
-    total: string | null
 }
 
 type TActionData = {
@@ -43,10 +38,11 @@ type TSelectedAction = {
 
 const Editor: React.FC = () => {
     const [isDrawing, setDrawing] = useState<boolean>(false)
-    const [buttonTimestamp, setButtonTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
-    const [hotspotTimestamp, setHotspotTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
-    const [textTimestamp, setTextTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
-    const [imageTimestamp, setImageTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [buttonTimestamp, setButtonTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [hotspotTimestamp, setHotspotTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [textTimestamp, setTextTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [imageTimestamp, setImageTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [commentTimestamp, setCommentTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [videoUrl, setVideoUrl] = useState<string | null>(null)
     const [asideTitle, setAsideTitle] = useState<string>('Interactions')
     const [controlsData, setControlsData] = useState<TControlButton[]>([
@@ -84,13 +80,6 @@ const Editor: React.FC = () => {
         },
         {
             id: 3,
-            icon: faQuestionCircle,
-            title: 'Question',
-            hint: 'Add Question',
-            handler: () => console.log('test')
-        },
-        {
-            id: 4,
             icon: faImage,
             title: 'Image',
             hint: 'Add Image',
@@ -105,7 +94,7 @@ const Editor: React.FC = () => {
             })
         },
         {
-            id: 5,
+            id: 4,
             icon: faFont,
             title: 'Text',
             hint: 'Add Text',
@@ -120,10 +109,10 @@ const Editor: React.FC = () => {
             })
         },
         {
-            id: 6,
+            id: 5,
             icon: faPlusCircle,
             title: 'More',
-            hint: 'Drawings, Media Clips, Navigations',
+            hint: 'Drawing',
             handler: () => handleMorePopup()
         }
     ])
@@ -178,6 +167,7 @@ const Editor: React.FC = () => {
     const [activePickerId, setActivePickerId] = useState<number | null>(null)
     const [selectedPause, setSelectedPause] = useState<TPauseData>({ id: 1, name: 'Until Viewer Click', value: 'click' })
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
+    const [newComment, setNewComment] = useState<string>('')
     const [pauseData, setPauseData] = useState<TPauseData[]>([
         {
             id: 1,
@@ -412,6 +402,10 @@ const Editor: React.FC = () => {
         })
     }
 
+    function handleAddComment(interaction: IInteraction) {
+        setInteractions([...interactionData, interaction]);
+    }
+
     function handleAddNewButton(interaction: ICurrentInteraction) {
         handleAddButton({
             id: interaction.id,
@@ -458,6 +452,24 @@ const Editor: React.FC = () => {
             title: interaction.title,
             icon: faImage
         })
+    }
+
+    function handleAddCommentInteraction(interaction: IInteraction) {
+        const trimmedComment = newComment.trim()
+
+        if (trimmedComment !== '') {
+            handleAddComment({
+                id: interaction.id,
+                duration: interaction.duration,
+                title: interaction.title,
+                icon: interaction.icon,
+                type: interaction.type,
+                tooltip: interaction.tooltip
+            });
+            setNewComment('')
+        } else {
+            alert('Please, fill comment field')
+        }
     }
 
     function handleInteractionChangeValue(event: React.ChangeEvent<HTMLInputElement>) {
@@ -508,13 +520,18 @@ const Editor: React.FC = () => {
             endTime: timeStamp.end,
             total: timeStamp.end
         })
+        setCommentTimestamp({
+            startTime: timeStamp.start,
+            endTime: timeStamp.end,
+            total: timeStamp.end
+        })
     }
 
     function handleTimestampForward(timeline: 'start' | 'end') {
         if (!currentInteraction?.value) return
 
         if (currentInteraction?.value === 'button') {
-            setButtonTimestamp((prev: TButtonTimestamp) => {
+            setButtonTimestamp((prev: IButtonTimestamp) => {
                 if (!prev.startTime || !prev.endTime) {
                     console.error('Start or End time is not defined')
                     return prev
@@ -546,7 +563,7 @@ const Editor: React.FC = () => {
                 }
             })
         } else if (currentInteraction.value === 'hotspot') {
-            setHotspotTimestamp((prev: TButtonTimestamp) => {
+            setHotspotTimestamp((prev: IButtonTimestamp) => {
                 if (!prev.startTime || !prev.endTime) {
                     console.error('Start or End time is not defined')
                     return prev
@@ -578,7 +595,7 @@ const Editor: React.FC = () => {
                 }
             })
         } else if (currentInteraction.value === 'text') {
-            setTextTimestamp((prev: TButtonTimestamp) => {
+            setTextTimestamp((prev: IButtonTimestamp) => {
                 if (!prev.startTime || !prev.endTime) {
                     console.error('Start or End time is not defined')
                     return prev
@@ -610,7 +627,7 @@ const Editor: React.FC = () => {
                 }
             })
         } else if (currentInteraction.value === 'image') {
-            setImageTimestamp((prev: TButtonTimestamp) => {
+            setImageTimestamp((prev: IButtonTimestamp) => {
                 if (!prev.startTime || !prev.endTime) {
                     console.error('Start or End time is not defined')
                     return prev
@@ -1034,6 +1051,10 @@ const Editor: React.FC = () => {
         })
     }
 
+    function handleChangeAddComment(event: React.ChangeEvent<HTMLInputElement>) {
+        setNewComment(event.target.value)
+    }
+
     return (
         <div className={`flex justify__space__between`}>
             {
@@ -1361,7 +1382,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {
