@@ -211,6 +211,25 @@
             }
         }
 
+        .setImageInputContainer {
+            margin-top: 40px;
+            margin-bottom: 20px;
+
+            input {
+                display: none;
+            }
+
+            label {
+                padding: 8px 14px;
+                color: #1b9bf3;
+                caret-color: #1b9bf3;
+                border:2px solid currentColor;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+        }
+
         .uiSettingsContainer {
             gap: 8px;
             margin-top: 12px;

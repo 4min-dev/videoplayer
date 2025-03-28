@@ -15,7 +15,6 @@ type TVideoPlayer = {
     isVideoStarted: boolean,
     setVideoStarted: React.Dispatch<React.SetStateAction<boolean>>,
     setButtonProps: React.Dispatch<React.SetStateAction<{ left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }>>,
-    buttonTitle: string,
     buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
     buttonStyle: IStyleColor[]
 }
@@ -29,7 +28,6 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     isVideoStarted,
     setVideoStarted,
     setButtonProps,
-    buttonTitle,
     buttonProps,
     buttonStyle
 }) => {
@@ -270,23 +268,6 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         }
     }, [currentInteraction])
 
-    useEffect(() => {
-        console.log({
-            color:
-                typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
-                    ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
-                    : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
-            backgroundColor:
-                typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
-                    ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
-                    : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
-            borderColor:
-                typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
-                    ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
-                    : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
-        })
-    }, [buttonStyle])
-
     return (
         <div className={`flex align__center justify__center ${styles.videoPlayer}`}>
             <div className={styles.videoWrapper} ref={wrapperRef}>
@@ -298,28 +279,92 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                         width: `${buttonSize.width}px`,
                         height: `${buttonSize.height}px`
                     }}>
-                        <button
-                            ref={buttonRef}
-                            type="button"
-                            className={styles.draggableButton}
-                            onMouseDown={handleDragStart}
-                            onTouchStart={handleDragStart}
-                            style={{
-                                color:
-                                    typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
-                                        ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
-                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
-                                backgroundColor:
-                                    typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
-                                        ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
-                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
-                                borderColor:
-                                    typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
-                                        ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
-                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
-                            }}>
-                            {buttonTitle}
-                        </button>
+                        {
+                            currentInteraction.value === 'button' && (
+                                <button
+                                    ref={buttonRef}
+                                    type="button"
+                                    className={styles.draggableButton}
+                                    onMouseDown={handleDragStart}
+                                    onTouchStart={handleDragStart}
+                                    style={{
+                                        color:
+                                            typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                        backgroundColor:
+                                            typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                        borderColor:
+                                            typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
+                                    }}>
+                                    {currentInteraction.title}
+                                </button>
+                            )
+                        }
+
+                        {
+                            currentInteraction.value === 'hotspot' && (
+                                <button
+                                    ref={buttonRef}
+                                    type="button"
+                                    className={styles.draggableHotspot}
+                                    onMouseDown={handleDragStart}
+                                    onTouchStart={handleDragStart}
+                                    style={{
+                                        backgroundColor:
+                                            typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                    }}>
+                                    {currentInteraction.title}
+                                </button>
+                            )
+                        }
+
+                        {
+                            currentInteraction.value === 'text' && (
+                                <button
+                                    ref={buttonRef}
+                                    type="button"
+                                    className={`flex align__center justify__center text__center ${styles.draggableText}`}
+                                    onMouseDown={handleDragStart}
+                                    onTouchStart={handleDragStart}
+                                    style={{
+                                        color:
+                                            typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                        backgroundColor:
+                                            typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
+                                                ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                    }}>
+                                    {
+                                        currentInteraction.title
+                                    }
+                                </button>
+                            )
+                        }
+
+                        {
+                            currentInteraction.value === 'image' && (
+                                <button
+                                    ref={buttonRef}
+                                    type="button"
+                                    className={`flex align__center justify__center text__center ${styles.draggableImage}`}
+                                    onMouseDown={handleDragStart}
+                                    onTouchStart={handleDragStart}>
+                                    {currentInteraction.imgHref && (
+                                        <img src={currentInteraction.imgHref} alt={`${currentInteraction.id}_img`} />
+                                    )}
+                                </button>
+                            )
+                        }
+
                         <div
                             className={`${styles.resizePoint} ${styles.resizeHandleTop}`}
                             onMouseDown={(e) => handleResizeStart(e, 'top')}

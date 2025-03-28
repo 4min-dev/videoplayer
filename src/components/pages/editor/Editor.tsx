@@ -60,6 +60,9 @@ type TButtonProps = {
 
 const Editor: React.FC = () => {
     const [buttonTimestamp, setButtonTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [hotspotTimestamp, setHotspotTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [textTimestamp, setTextTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
+    const [imageTimestamp, setImageTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [videoUrl, setVideoUrl] = useState<string | null>(null)
     const [asideTitle, setAsideTitle] = useState<string>('Interactions')
     const [controlsData, setControlsData] = useState<TControlButton[]>([
@@ -68,20 +71,32 @@ const Editor: React.FC = () => {
             icon: faHandPointUp,
             title: 'Button',
             hint: 'Add Button',
-            handler: () => handleAddNewButton({
-                id: Date.now(),
-                isPause: false,
-                startTime: buttonTimestamp.startTime!,
-                endTime: buttonTimestamp.endTime!,
-                value: 'button'
-            })
+            handler: () => {
+                handleAddNewButton({
+                    id: Date.now(),
+                    isPause: false,
+                    startTime: buttonTimestamp.startTime!,
+                    endTime: buttonTimestamp.endTime!,
+                    value: 'button',
+                    title: '',
+                    icon: faHandPointUp
+                })
+            }
         },
         {
             id: 2,
             icon: faSun,
             title: 'Hotspot',
             hint: 'Add Hotspot',
-            handler: () => console.log('test')
+            handler: () => handleAddNewHotspot({
+                id: Date.now(),
+                isPause: false,
+                startTime: hotspotTimestamp.startTime!,
+                endTime: hotspotTimestamp.endTime!,
+                value: 'hotspot',
+                title: '',
+                icon: faSun
+            })
         },
         {
             id: 3,
@@ -95,14 +110,30 @@ const Editor: React.FC = () => {
             icon: faImage,
             title: 'Image',
             hint: 'Add Image',
-            handler: () => console.log('test')
+            handler: () => handleAddNewImage({
+                id: Date.now(),
+                isPause: false,
+                startTime: hotspotTimestamp.startTime!,
+                endTime: hotspotTimestamp.endTime!,
+                value: 'image',
+                title: '',
+                icon: faImage
+            })
         },
         {
             id: 5,
             icon: faFont,
             title: 'Text',
             hint: 'Add Text',
-            handler: () => console.log('test')
+            handler: () => handleAddNewText({
+                id: Date.now(),
+                isPause: false,
+                startTime: hotspotTimestamp.startTime!,
+                endTime: hotspotTimestamp.endTime!,
+                value: 'text',
+                title: '',
+                icon: faFont
+            })
         },
         {
             id: 6,
@@ -114,24 +145,7 @@ const Editor: React.FC = () => {
     ])
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
     const [currentInteraction, setCurrentInteraction] = useState<ICurrentInteraction | null>(null)
-    const [interactionData, setInteractions] = useState<TInteraction[]>([
-        {
-            id: 1,
-            duration: '0:00',
-            icon: faQuestionCircle,
-            title: 'ksdfsf',
-            type: 'Question',
-            types: [
-                {
-                    id: 1,
-                    background: 'rgba(67, 198, 172, 0.5)',
-                    color: 'black',
-                    title: 'Rating (1-5)'
-                }
-            ],
-            tooltip: 'Question that shows at 00:00'
-        }
-    ])
+    const [interactionData, setInteractions] = useState<TInteraction[]>([])
     const [buttonProps, setButtonProps] = useState<TButtonProps>({
         left: '200',
         top: '200',
@@ -140,7 +154,6 @@ const Editor: React.FC = () => {
         bottom: '200'
     })
     const [linkToOpen, setLinkToOpen] = useState<string>('')
-    const [buttonTitle, setButtonTitle] = useState<string>('')
     const [isActionSelector, setIsActionSelector] = useState<boolean>(false)
     const [selectedAction, setSelectedAction] = useState<TSelectedAction>({ id: 3, title: 'None' })
     const [actionsData, setActionsData] = useState<TActionData[]>([
@@ -162,31 +175,11 @@ const Editor: React.FC = () => {
             actionHandler: (action: TSelectedAction) => selectActionHandler(action)
         }
     ])
-    const [styleColorData, setStyleColorData] = useState<IStyleColor[]>([
-        {
-            id: 1,
-            name: 'Text',
-            value: '#fff',
-            defaultValue: '#fff'
-        },
-
-        {
-            id: 2,
-            name: 'Background',
-            value: 'rgb(92, 75, 192)',
-            defaultValue: 'rgb(92, 75, 192)'
-        },
-
-        {
-            id: 3,
-            name: 'Border',
-            value: '#fff',
-            defaultValue: '#fff'
-        }
-    ])
+    const [styleColorData, setStyleColorData] = useState<IStyleColor[]>([])
     const [isStylingActive, setStylingActive] = useState<boolean>(false)
     const [activePickerId, setActivePickerId] = useState<number | null>(null)
     const [selectedPause, setSelectedPause] = useState<TPauseData>({ id: 1, name: 'Until Viewer Click', value: 'click' })
+    const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const [pauseData, setPauseData] = useState<TPauseData[]>([
         {
             id: 1,
@@ -260,6 +253,55 @@ const Editor: React.FC = () => {
     ])
     const [isPauseSelector, setPauseSelector] = useState<boolean>(false)
 
+    useEffect(() => {
+        if (currentInteraction?.value === 'button') {
+            setStyleColorData([
+                {
+                    id: 1,
+                    name: 'Text',
+                    value: '#fff',
+                    defaultValue: '#fff',
+                },
+                {
+                    id: 2,
+                    name: 'Background',
+                    value: 'rgb(92, 75, 192)',
+                    defaultValue: 'rgb(92, 75, 192)',
+                },
+                {
+                    id: 3,
+                    name: 'Border',
+                    value: '#fff',
+                    defaultValue: '#fff',
+                },
+            ])
+        } else if (currentInteraction?.value === 'hotspot') {
+            setStyleColorData([
+                {
+                    id: 1,
+                    name: 'Background',
+                    value: 'rgb(27, 155, 243)',
+                    defaultValue: 'rgb(92, 75, 192)',
+                }
+            ])
+        } else if (currentInteraction?.value === 'text') {
+            setStyleColorData([
+                {
+                    id: 1,
+                    name: 'Text',
+                    value: '#fff',
+                    defaultValue: '#fff',
+                },
+                {
+                    id: 2,
+                    name: 'Background',
+                    value: 'rgba(0, 0, 0, 0.75)',
+                    defaultValue: 'rgba(0, 0, 0, 0.75)'
+                }
+            ])
+        }
+    }, [currentInteraction?.value])
+
     function pauseActionHandler(action: TPauseData) {
         setSelectedPause({ id: action.id, name: action.name, value: action.value })
         setPauseSelector(false)
@@ -330,7 +372,45 @@ const Editor: React.FC = () => {
             startTime: interaction.startTime,
             endTime: interaction.endTime,
             value: interaction.value,
-            isPause: interaction.isPause
+            isPause: interaction.isPause,
+            title: interaction.title,
+            icon: faHandPointUp
+        })
+    }
+
+    function handleAddHotspot(interaction: ICurrentInteraction) {
+        setCurrentInteraction({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            value: interaction.value,
+            isPause: interaction.isPause,
+            title: interaction.title,
+            icon: faSun
+        })
+    }
+
+    function handleAddText(interaction: ICurrentInteraction) {
+        setCurrentInteraction({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            value: interaction.value,
+            isPause: interaction.isPause,
+            title: interaction.title,
+            icon: faFont
+        })
+    }
+
+    function handleAddImage(interaction: ICurrentInteraction) {
+        setCurrentInteraction({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            value: interaction.value,
+            isPause: interaction.isPause,
+            title: interaction.title,
+            icon: faImage
         })
     }
 
@@ -340,12 +420,57 @@ const Editor: React.FC = () => {
             startTime: interaction.startTime,
             endTime: interaction.endTime,
             isPause: interaction.isPause,
-            value: interaction.value
+            value: interaction.value,
+            title: interaction.title,
+            icon: faHandPointUp
         })
     }
 
-    function handleButtonTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setButtonTitle(event.target.value)
+    function handleAddNewHotspot(interaction: ICurrentInteraction) {
+        handleAddHotspot({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            isPause: interaction.isPause,
+            value: interaction.value,
+            title: interaction.title,
+            icon: faSun
+        })
+    }
+
+    function handleAddNewText(interaction: ICurrentInteraction) {
+        handleAddText({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            isPause: interaction.isPause,
+            value: interaction.value,
+            title: interaction.title,
+            icon: faFont
+        })
+    }
+
+    function handleAddNewImage(interaction: ICurrentInteraction) {
+        handleAddImage({
+            id: interaction.id,
+            startTime: interaction.startTime,
+            endTime: interaction.endTime,
+            isPause: interaction.isPause,
+            value: interaction.value,
+            title: interaction.title,
+            icon: faImage
+        })
+    }
+
+    function handleInteractionChangeValue(event: React.ChangeEvent<HTMLInputElement>) {
+        setCurrentInteraction((prev) => {
+            if (!prev) return null
+
+            return {
+                ...prev,
+                title: event.target.value,
+            }
+        })
     }
 
     const handleValueChange = (field: keyof typeof buttonProps, delta: number) => {
@@ -370,72 +495,278 @@ const Editor: React.FC = () => {
             endTime: timeStamp.end,
             total: timeStamp.end
         })
+        setHotspotTimestamp({
+            startTime: timeStamp.start,
+            endTime: timeStamp.end,
+            total: timeStamp.end
+        })
+        setTextTimestamp({
+            startTime: timeStamp.start,
+            endTime: timeStamp.end,
+            total: timeStamp.end
+        })
+        setImageTimestamp({
+            startTime: timeStamp.start,
+            endTime: timeStamp.end,
+            total: timeStamp.end
+        })
     }
 
     function handleTimestampForward(timeline: 'start' | 'end') {
-        setButtonTimestamp((prev: TButtonTimestamp) => {
-            if (!prev.startTime || !prev.endTime) {
-                console.error('Start or End time is not defined')
-                return prev
-            }
+        if (!currentInteraction?.value) return
 
-            if (timeline === 'start') {
-                const newStartTime = convertToSeconds(prev.startTime) + 1
-                if (newStartTime > convertToSeconds(prev.endTime)) {
-                    console.warn('Start time cannot be greater than end time')
-                    return prev
-                }
-                return {
-                    ...prev,
-                    startTime: convertToTimeString(newStartTime),
-                }
-            } else {
-                const newEndTime = convertToSeconds(prev.endTime) + 1
-                const totalTime = convertToSeconds(prev.total!)
-
-                if (buttonTimestamp.total && newEndTime > totalTime) {
-                    console.warn('End time cannot exceed total video duration')
+        if (currentInteraction?.value === 'button') {
+            setButtonTimestamp((prev: TButtonTimestamp) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
                     return prev
                 }
 
-                return {
-                    ...prev,
-                    endTime: convertToTimeString(newEndTime),
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) + 1
+                    if (newStartTime > convertToSeconds(prev.endTime)) {
+                        console.warn('Start time cannot be greater than end time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) + 1
+                    const totalTime = convertToSeconds(prev.total!)
+
+                    if (buttonTimestamp.total && newEndTime > totalTime) {
+                        console.warn('End time cannot exceed total video duration')
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
                 }
-            }
-        })
+            })
+        } else if (currentInteraction.value === 'hotspot') {
+            setHotspotTimestamp((prev: TButtonTimestamp) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
+                    return prev
+                }
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) + 1
+                    if (newStartTime > convertToSeconds(prev.endTime)) {
+                        console.warn('Start time cannot be greater than end time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) + 1
+                    const totalTime = convertToSeconds(prev.total!)
+
+                    if (hotspotTimestamp.total && newEndTime > totalTime) {
+                        console.warn('End time cannot exceed total video duration')
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
+                }
+            })
+        } else if (currentInteraction.value === 'text') {
+            setTextTimestamp((prev: TButtonTimestamp) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
+                    return prev
+                }
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) + 1
+                    if (newStartTime > convertToSeconds(prev.endTime)) {
+                        console.warn('Start time cannot be greater than end time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) + 1
+                    const totalTime = convertToSeconds(prev.total!)
+
+                    if (textTimestamp.total && newEndTime > totalTime) {
+                        console.warn('End time cannot exceed total video duration')
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
+                }
+            })
+        } else if (currentInteraction.value === 'image') {
+            setImageTimestamp((prev: TButtonTimestamp) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
+                    return prev
+                }
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) + 1
+                    if (newStartTime > convertToSeconds(prev.endTime)) {
+                        console.warn('Start time cannot be greater than end time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) + 1
+                    const totalTime = convertToSeconds(prev.total!)
+
+                    if (imageTimestamp.total && newEndTime > totalTime) {
+                        console.warn('End time cannot exceed total video duration')
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
+                }
+            })
+        }
     }
 
 
     function handleTimestampBack(timeline: 'start' | 'end') {
-        setButtonTimestamp((prev) => {
-            if (!prev.startTime || !prev.endTime) {
-                console.error('Start or End time is not defined')
-                return prev
-            }
+        if (!currentInteraction?.value) return
 
-            if (timeline === 'start') {
-                const newStartTime = convertToSeconds(prev.startTime) - 1
-                if (newStartTime < 0) {
-                    console.warn('Start time cannot be less than 0 seconds')
+        if (currentInteraction?.value === 'button') {
+            setButtonTimestamp((prev) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
                     return prev
                 }
-                return {
-                    ...prev,
-                    startTime: convertToTimeString(newStartTime),
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) - 1
+                    if (newStartTime < 0) {
+                        console.warn('Start time cannot be less than 0 seconds')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) - 1
+                    if (newEndTime < convertToSeconds(prev.startTime)) {
+                        console.warn('End time cannot be less than start time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
                 }
-            } else {
-                const newEndTime = convertToSeconds(prev.endTime) - 1
-                if (newEndTime < convertToSeconds(prev.startTime)) {
-                    console.warn('End time cannot be less than start time')
+            })
+        } else if (currentInteraction.value === 'hotspot') {
+            setHotspotTimestamp((prev) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
                     return prev
                 }
-                return {
-                    ...prev,
-                    endTime: convertToTimeString(newEndTime),
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) - 1
+                    if (newStartTime < 0) {
+                        console.warn('Start time cannot be less than 0 seconds')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) - 1
+                    if (newEndTime < convertToSeconds(prev.startTime)) {
+                        console.warn('End time cannot be less than start time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
                 }
-            }
-        })
+            })
+        } else if (currentInteraction.value === 'text') {
+            setTextTimestamp((prev) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
+                    return prev
+                }
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) - 1
+                    if (newStartTime < 0) {
+                        console.warn('Start time cannot be less than 0 seconds')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) - 1
+                    if (newEndTime < convertToSeconds(prev.startTime)) {
+                        console.warn('End time cannot be less than start time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
+                }
+            })
+        } else if (currentInteraction.value === 'image') {
+            setImageTimestamp((prev) => {
+                if (!prev.startTime || !prev.endTime) {
+                    console.error('Start or End time is not defined')
+                    return prev
+                }
+
+                if (timeline === 'start') {
+                    const newStartTime = convertToSeconds(prev.startTime) - 1
+                    if (newStartTime < 0) {
+                        console.warn('Start time cannot be less than 0 seconds')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        startTime: convertToTimeString(newStartTime),
+                    }
+                } else {
+                    const newEndTime = convertToSeconds(prev.endTime) - 1
+                    if (newEndTime < convertToSeconds(prev.startTime)) {
+                        console.warn('End time cannot be less than start time')
+                        return prev
+                    }
+                    return {
+                        ...prev,
+                        endTime: convertToTimeString(newEndTime),
+                    }
+                }
+            })
+        }
     }
 
     function convertToSeconds(time: string): number {
@@ -507,16 +838,50 @@ const Editor: React.FC = () => {
         })
     }
 
-    function handleSaveButtonValidate(isAddAnother:boolean) {
+    function handleSaveButtonValidate(isAddAnother: boolean) {
         if (selectedAction.title === 'Open Link') {
             if (handleValidateLink()) {
+                if (currentInteraction?.value === 'button') {
+                    handleAddInteraction({
+                        title: currentInteraction.title,
+                        duration: String(buttonTimestamp.startTime),
+                        icon: currentInteraction.icon,
+                        id: Number(new Date()),
+                        tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
+                        type: 'Button',
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                    })
+                } else if (currentInteraction?.value === 'hotspot') {
+                    handleAddInteraction({
+                        title: currentInteraction.title,
+                        duration: String(hotspotTimestamp.startTime),
+                        icon: currentInteraction.icon,
+                        id: Number(new Date()),
+                        tooltip: `Hotspot that shows at ${hotspotTimestamp.startTime} and hides at ${hotspotTimestamp.endTime}`,
+                        type: 'Hotspot',
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                    })
+                } else if (currentInteraction?.value === 'text') {
+                    handleAddInteraction({
+                        title: currentInteraction.title,
+                        duration: String(textTimestamp.startTime),
+                        icon: currentInteraction.icon,
+                        id: Number(new Date()),
+                        tooltip: `Hotspot that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                        type: 'Text',
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                    })
+                }
+
+                handleDiscardChanges(isAddAnother)
+            } else if (currentInteraction?.value === 'image') {
                 handleAddInteraction({
-                    title: buttonTitle,
-                    duration: String(buttonTimestamp.startTime),
-                    icon: faHandPointUp,
+                    title: currentInteraction.title,
+                    duration: String(textTimestamp.startTime),
+                    icon: currentInteraction.icon,
                     id: Number(new Date()),
-                    tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
-                    type: 'Button',
+                    tooltip: `Image that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                    type: 'Image',
                     types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
                 })
 
@@ -525,37 +890,66 @@ const Editor: React.FC = () => {
                 alert('Please, fill link field')
             }
         } else {
-
-            if (buttonTitle !== '') {
+            if (currentInteraction?.value === 'hotspot') {
                 handleAddInteraction({
-                    title: buttonTitle,
+                    title: currentInteraction.title,
+                    duration: String(hotspotTimestamp.startTime),
+                    icon: currentInteraction.icon,
+                    id: Number(new Date()),
+                    tooltip: `Hotspot that shows at ${hotspotTimestamp.startTime} and hides at ${hotspotTimestamp.endTime}`,
+                    type: 'Hotspot',
+                    buttonProps: buttonProps,
+                    styles: styleColorData
+                })
+                handleDiscardChanges(isAddAnother)
+            } else if (currentInteraction?.value === 'text' && currentInteraction.title !== '') {
+                handleAddInteraction({
+                    title: currentInteraction.title,
+                    duration: String(textTimestamp.startTime),
+                    icon: currentInteraction.icon,
+                    id: Number(new Date()),
+                    tooltip: `Button that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                    type: 'Text',
+                    buttonProps: buttonProps,
+                    styles: styleColorData
+                })
+                handleDiscardChanges(isAddAnother)
+            } else if (currentInteraction?.title !== '' && currentInteraction?.value === 'button') {
+                handleAddInteraction({
+                    title: currentInteraction.title,
                     duration: String(buttonTimestamp.startTime),
-                    icon: faHandPointUp,
+                    icon: currentInteraction.icon,
                     id: Number(new Date()),
                     tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
                     type: 'Button',
                     buttonProps: buttonProps,
                     styles: styleColorData
                 })
+                handleDiscardChanges(isAddAnother)
+            } else if (currentInteraction?.value === 'image' && selectedImage) {
+                handleAddInteraction({
+                    title: currentInteraction.title,
+                    duration: String(imageTimestamp.startTime),
+                    icon: currentInteraction.icon,
+                    id: Number(new Date()),
+                    tooltip: `Image that shows at ${imageTimestamp.startTime} and hides at ${imageTimestamp.endTime}`,
+                    type: 'Image',
+                    buttonProps: buttonProps,
+                    styles: styleColorData
+                })
 
                 handleDiscardChanges(isAddAnother)
             } else {
-                alert('Please, fill button title')
+                alert('Please, fill required fields')
             }
+
         }
     }
 
-    function handleDiscardChanges(isAddAnother:boolean) {
+    function handleDiscardChanges(isAddAnother: boolean) {
         !isAddAnother ? setCurrentInteraction(null) : ''
-        setButtonProps({
-            left: '200',
-            top: '200',
-            width: '84',
-            height: '48',
-            bottom: '200'
-        })
-        setButtonTitle('')
-        setStyleColorData([
+
+        const colorData = currentInteraction?.value === 'button' ? [
             {
                 id: 1,
                 name: 'Text',
@@ -576,7 +970,58 @@ const Editor: React.FC = () => {
                 value: '#fff',
                 defaultValue: '#fff'
             }
-        ])
+        ] : [
+            {
+                id: 1,
+                name: 'Background',
+                value: 'rgb(27, 155, 243)',
+                defaultValue: 'rgb(92, 75, 192)',
+            }
+        ]
+
+        setButtonProps({
+            left: '200',
+            top: '200',
+            width: '84',
+            height: '48',
+            bottom: '200'
+        })
+        setSelectedAction({ id: 3, title: 'None' })
+        setLinkToOpen('')
+        setStyleColorData(colorData)
+        setCurrentInteraction((prev) => {
+            if (!prev) return null
+
+            return {
+                ...prev,
+                title: '',
+                imgHref:''
+            }
+        })
+        setSelectedImage(null)
+    }
+
+    function imageChangeHandler(event: React.ChangeEvent<HTMLInputElement>) {
+        const files = event.target.files
+        if (files && files.length > 0) {
+            const file = files[0]
+
+            const imageUrl = URL.createObjectURL(file)
+
+            setSelectedImage(imageUrl)
+            setCurrentInteraction((prev) => {
+                if (!prev) return null
+
+                return {
+                    ...prev,
+                    imgHref: imageUrl
+                }
+            })
+
+            console.log('Файл успешно загружен:', file)
+        } else {
+            console.log('Файл не выбран')
+        }
     }
 
     return (
@@ -660,7 +1105,9 @@ const Editor: React.FC = () => {
                                                     </TooltipButton>
 
                                                     <span className={styles.currentInteractionHeadingCardValue}>
-                                                        {buttonTimestamp.startTime}
+                                                        {
+                                                            currentInteraction.value === 'button' ? buttonTimestamp.startTime : hotspotTimestamp.startTime
+                                                        }
                                                     </span>
 
                                                     <TooltipButton position='bottom' tooltip='Forward 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.plusButton}`} tooltipClassname={styles.rightControlButtonTooltip} handleMouseClick={() => handleTimestampForward('start')}>
@@ -684,7 +1131,9 @@ const Editor: React.FC = () => {
                                                     </TooltipButton>
 
                                                     <span className={styles.currentInteractionHeadingCardValue}>
-                                                        {buttonTimestamp.endTime}
+                                                        {
+                                                            currentInteraction.value === 'button' ? buttonTimestamp.endTime : hotspotTimestamp.endTime
+                                                        }
                                                     </span>
 
                                                     <TooltipButton position='bottom' tooltip='Forward 1 seconds' buttonClassname={`${styles.timestampControlButton} ${styles.plusButton}`} tooltipClassname={styles.rightControlButtonTooltip} handleMouseClick={() => handleTimestampForward('end')}>
@@ -698,12 +1147,53 @@ const Editor: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        <div className={`flex column align__center ${styles.currentInteractionInputContainer}`}>
-                                            <span className={styles.currentInteractionInputName}>
-                                                Button Label
-                                            </span>
+                                        {
+                                            currentInteraction.value === 'image' && (
+                                                <div className={styles.setImageInputContainer}>
+                                                    <input type='file' id='imageFile' accept='image/jpeg, image/png, image/gif, image/webp' onChange={imageChangeHandler} />
+                                                    <label htmlFor='imageFile'>
+                                                        Choose Image
+                                                    </label>
+                                                </div>
+                                            )
+                                        }
 
-                                            <input value={buttonTitle} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Button Text' onChange={handleButtonTitleChange} />
+                                        <div className={`flex column align__center ${styles.currentInteractionInputContainer}`}>
+                                            {
+                                                currentInteraction.value === 'button' && (
+                                                    <>
+                                                        <span className={styles.currentInteractionInputName}>
+                                                            Button Label
+                                                        </span>
+                                                        <input value={currentInteraction.title} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Button Text' onChange={handleInteractionChangeValue} />
+                                                    </>)
+                                            }
+
+                                            {
+                                                currentInteraction.value === 'hotspot' && <input value={currentInteraction.title} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Hotspot Label (Optional)' onChange={handleInteractionChangeValue} style={{ marginTop: '24px' }} />
+                                            }
+
+                                            {
+                                                currentInteraction.value === 'text' && (
+                                                    <>
+                                                        <span className={styles.currentInteractionInputName}>
+                                                            Text Label
+                                                        </span>
+                                                        <input value={currentInteraction.title} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Text' onChange={handleInteractionChangeValue} />
+                                                    </>
+                                                )
+                                            }
+
+                                            {
+                                                currentInteraction.value === 'image' && (
+                                                    <>
+                                                        <span className={styles.currentInteractionInputName}>
+                                                            Label
+                                                        </span>
+                                                        <input value={currentInteraction.title} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Image Label (Optional)' onChange={handleInteractionChangeValue} />
+                                                    </>
+                                                )
+                                            }
                                         </div>
 
                                         <div className={`flex column ${styles.selectorContainer}`}>
@@ -750,19 +1240,23 @@ const Editor: React.FC = () => {
                                             )
                                         }
 
-                                        <div className={`flex align__center ${styles.uiSettingsContainer}`}>
-                                            <TooltipButton position='top' tooltip='Update Colors'>
-                                                <div className={`flex align__center justify__center ${styles.uiSettingsButton} ${isStylingActive ? styles.active : ''}`} onClick={() => setStylingActive((prev) => !prev)}>
-                                                    Styling
-                                                </div>
-                                            </TooltipButton>
+                                        {
+                                            currentInteraction.value !== 'image' && (
+                                                <div className={`flex align__center ${styles.uiSettingsContainer}`}>
+                                                    <TooltipButton position='top' tooltip='Update Colors'>
+                                                        <div className={`flex align__center justify__center ${styles.uiSettingsButton} ${isStylingActive ? styles.active : ''}`} onClick={() => setStylingActive((prev) => !prev)}>
+                                                            Styling
+                                                        </div>
+                                                    </TooltipButton>
 
-                                            {/* <TooltipButton position='top' tooltip='Conditional Logic, Variables, and more'>
+                                                    {/* <TooltipButton position='top' tooltip='Conditional Logic, Variables, and more'>
                                                 <div className={`flex align__center justify__center ${styles.uiSettingsButton}`}>
                                                     Settings
                                                 </div>
                                             </TooltipButton> */}
-                                        </div>
+                                                </div>
+                                            )
+                                        }
 
                                         {isStylingActive && (
                                             <div className={`flex column ${styles.styleSettingsContainer}`}>
@@ -919,7 +1413,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonTitle={buttonTitle} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {
