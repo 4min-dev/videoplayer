@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { ChromePicker } from 'react-color'
 import Aside from './ui/aside/Aside'
 import styles from './Editor.module.scss'
 import EditorVideoOverlay from './ui/videoOverlay/VideoOverlay'
@@ -8,6 +9,9 @@ import { faHandPointUp, faImage, faQuestionCircle, faSun } from '@fortawesome/fr
 import { faBolt, faChevronDown, faEllipsisVertical, faFont, faMinus, faPlay, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import TooltipButton from '../../ui/buttons/tooltipButton/TooltipButton'
 import ICurrentInteraction from '../../../interfaces/ICurrentInteraction'
+import IStyleColor from '../../../interfaces/IStyleColor'
+import TPauseData from '../../../interfaces/TPauseData'
+import rgbaToString from '../../../assets/rgbaToString'
 
 type TControlButton = {
     id: number,
@@ -24,7 +28,9 @@ type TInteraction = {
     type: string,
     title: string,
     types?: { title: string, id: number, background: string, color: string }[],
-    tooltip: string
+    tooltip: string,
+    buttonProps?: TButtonProps,
+    styles?: IStyleColor[]
 }
 
 type TButtonTimestamp = {
@@ -36,7 +42,20 @@ type TButtonTimestamp = {
 type TActionData = {
     id: number,
     title: string,
-    actionHandler: () => void
+    actionHandler: (props?: any) => void
+}
+
+type TSelectedAction = {
+    id: number | null,
+    title: string
+}
+
+type TButtonProps = {
+    left: string | null,
+    top: string | null,
+    width: string | null,
+    height: string | null,
+    bottom: string | null
 }
 
 const Editor: React.FC = () => {
@@ -113,22 +132,143 @@ const Editor: React.FC = () => {
             tooltip: 'Question that shows at 00:00'
         }
     ])
-    const [buttonProps, setButtonProps] = useState<{ left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }>({
+    const [buttonProps, setButtonProps] = useState<TButtonProps>({
         left: '200',
         top: '200',
-        width: '200',
-        height: '200',
+        width: '84',
+        height: '48',
         bottom: '200'
     })
+    const [linkToOpen, setLinkToOpen] = useState<string>('')
     const [buttonTitle, setButtonTitle] = useState<string>('')
     const [isActionSelector, setIsActionSelector] = useState<boolean>(false)
+    const [selectedAction, setSelectedAction] = useState<TSelectedAction>({ id: 3, title: 'None' })
     const [actionsData, setActionsData] = useState<TActionData[]>([
         {
             id: 1,
             title: 'Continue',
-            actionHandler: () => setIsActionSelector(false)
+            actionHandler: (action: TSelectedAction) => selectActionHandler(action)
+        },
+
+        {
+            id: 2,
+            title: 'Open Link',
+            actionHandler: (action: TSelectedAction) => selectActionHandler(action)
+        },
+
+        {
+            id: 3,
+            title: 'None',
+            actionHandler: (action: TSelectedAction) => selectActionHandler(action)
         }
     ])
+    const [styleColorData, setStyleColorData] = useState<IStyleColor[]>([
+        {
+            id: 1,
+            name: 'Text',
+            value: '#fff',
+            defaultValue: '#fff'
+        },
+
+        {
+            id: 2,
+            name: 'Background',
+            value: 'rgb(92, 75, 192)',
+            defaultValue: 'rgb(92, 75, 192)'
+        },
+
+        {
+            id: 3,
+            name: 'Border',
+            value: '#fff',
+            defaultValue: '#fff'
+        }
+    ])
+    const [isStylingActive, setStylingActive] = useState<boolean>(false)
+    const [activePickerId, setActivePickerId] = useState<number | null>(null)
+    const [selectedPause, setSelectedPause] = useState<TPauseData>({ id: 1, name: 'Until Viewer Click', value: 'click' })
+    const [pauseData, setPauseData] = useState<TPauseData[]>([
+        {
+            id: 1,
+            value: 'click',
+            name: 'Until Viewer Click',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 2,
+            value: '2',
+            name: '2 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 3,
+            value: '5',
+            name: '5 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 4,
+            value: '10',
+            name: '10 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 5,
+            value: '15',
+            name: '15 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 6,
+            value: '20',
+            name: '20 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 7,
+            value: '25',
+            name: '25 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 8,
+            value: '30',
+            name: '30 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 9,
+            value: '45',
+            name: '45 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+
+        {
+            id: 10,
+            value: '60',
+            name: '60 seconds',
+            actionHandler: (action: TPauseData) => pauseActionHandler(action)
+        },
+    ])
+    const [isPauseSelector, setPauseSelector] = useState<boolean>(false)
+
+    function pauseActionHandler(action: TPauseData) {
+        setSelectedPause({ id: action.id, name: action.name, value: action.value })
+        setPauseSelector(false)
+    }
+
+    function selectActionHandler(action: TSelectedAction) {
+        setSelectedAction({ id: action.id, title: action.title })
+        setIsActionSelector(false)
+    }
 
     const handleFullscreenToggle = () => {
         if (isFullscreen) {
@@ -313,6 +453,132 @@ const Editor: React.FC = () => {
         setIsActionSelector((prev) => !prev)
     }
 
+    function handleValidateLink(): boolean {
+        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)*$/
+
+        if (urlPattern.test(linkToOpen)) {
+            return true
+        } else {
+            console.error('Invalid link')
+            return false
+        }
+    }
+
+    const handleColorChange = (id: number, newColor: string | { r: number; g: number; b: number; a: number }) => {
+        setStyleColorData((prevData) =>
+            prevData.map((item) =>
+                item.id === id ? { ...item, value: newColor } : item
+            )
+        )
+    }
+
+    const closePicker = () => {
+        setActivePickerId(null)
+    }
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                activePickerId !== null &&
+                !event.composedPath().some((el) => (el as HTMLElement)?.classList?.contains(styles.colorPickerContainer))
+            ) {
+                closePicker()
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [activePickerId])
+
+    function handlePauseSelectorClick() {
+        setPauseSelector((prev) => !prev)
+    }
+
+    function handleCurrentInteractionPauseSelect() {
+        setCurrentInteraction((prev) => {
+            if (!prev) return null
+
+            return {
+                ...prev,
+                isPause: !prev?.isPause
+            }
+        })
+    }
+
+    function handleSaveButtonValidate(isAddAnother:boolean) {
+        if (selectedAction.title === 'Open Link') {
+            if (handleValidateLink()) {
+                handleAddInteraction({
+                    title: buttonTitle,
+                    duration: String(buttonTimestamp.startTime),
+                    icon: faHandPointUp,
+                    id: Number(new Date()),
+                    tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
+                    type: 'Button',
+                    types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                })
+
+                handleDiscardChanges(isAddAnother)
+            } else {
+                alert('Please, fill link field')
+            }
+        } else {
+
+            if (buttonTitle !== '') {
+                handleAddInteraction({
+                    title: buttonTitle,
+                    duration: String(buttonTimestamp.startTime),
+                    icon: faHandPointUp,
+                    id: Number(new Date()),
+                    tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
+                    type: 'Button',
+                    buttonProps: buttonProps,
+                    styles: styleColorData
+                })
+
+                handleDiscardChanges(isAddAnother)
+            } else {
+                alert('Please, fill button title')
+            }
+        }
+    }
+
+    function handleDiscardChanges(isAddAnother:boolean) {
+        !isAddAnother ? setCurrentInteraction(null) : ''
+        setButtonProps({
+            left: '200',
+            top: '200',
+            width: '84',
+            height: '48',
+            bottom: '200'
+        })
+        setButtonTitle('')
+        setStyleColorData([
+            {
+                id: 1,
+                name: 'Text',
+                value: '#fff',
+                defaultValue: '#fff'
+            },
+
+            {
+                id: 2,
+                name: 'Background',
+                value: 'rgb(92, 75, 192)',
+                defaultValue: 'rgb(92, 75, 192)'
+            },
+
+            {
+                id: 3,
+                name: 'Border',
+                value: '#fff',
+                defaultValue: '#fff'
+            }
+        ])
+    }
+
     return (
         <div className={`flex justify__space__between`}>
             {
@@ -327,14 +593,52 @@ const Editor: React.FC = () => {
                                             <span className={styles.asidePanelTitle}>{asideTitle}</span>
                                         </>
                                     ) :
-                                        <div className={`flex column ${styles.asidePanelTitleContainer}`}>
+                                        <div className={`flex column align__center ${styles.asidePanelTitleContainer}`}>
                                             <span className={styles.asidePanelTitle}>{`Add ${currentInteraction.value}`}</span>
                                             <div className={`flex align__center ${styles.asidePanelPauseCheckboxContainer}`}>
-                                                <input type='checkbox' id='pauseCheckbox' />
+                                                <input type='checkbox' id='pauseCheckbox' onClick={handleCurrentInteractionPauseSelect} />
                                                 <label htmlFor='pauseCheckbox'>
                                                     Pause for {currentInteraction.value}
                                                 </label>
                                             </div>
+
+                                            {
+                                                currentInteraction.isPause && (
+                                                    <div className={`flex column ${styles.selectorContainer}`}>
+                                                        <div className={`flex column align__center ${styles.currentInteractionSelectAction}`}>
+                                                            <span className={styles.currentInteractionInputName}>
+                                                                Pause Length
+                                                            </span>
+
+                                                            <div className={`flex align__center justify__space__between ${styles.actionRelative} ${styles.currentInteractionSelectActionSelecter}`} onClick={handlePauseSelectorClick}>
+                                                                <span className={styles.currentInteractionSelecterTitle}>
+                                                                    {selectedPause.name}
+                                                                </span>
+
+                                                                <button type='button' className={styles.currentInteractionSelecterButton}>
+                                                                    <FontAwesomeIcon style={{ width: '16', height: '16' }} icon={faChevronDown} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div className={`flex column ${styles.selectorWrapper} ${isPauseSelector ? styles.active : ''}`}>
+                                                            {
+                                                                pauseData.length > 0 ? pauseData.map((action: TPauseData) => (
+                                                                    <div className={styles.selector} key={action.id} onClick={() => action.actionHandler!(action)}>
+                                                                        {
+                                                                            action.name
+                                                                        }
+                                                                    </div>
+                                                                ))
+                                                                    : <h3>Не найдено</h3>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+
+
                                         </div>}
                                 </>
                             }
@@ -399,7 +703,7 @@ const Editor: React.FC = () => {
                                                 Button Label
                                             </span>
 
-                                            <input type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Button Text' onChange={handleButtonTitleChange} />
+                                            <input value={buttonTitle} type='text' className={`${styles.currentInteractionInput} ${styles.main}`} placeholder='Enter Button Text' onChange={handleButtonTitleChange} />
                                         </div>
 
                                         <div className={`flex column ${styles.selectorContainer}`}>
@@ -410,7 +714,7 @@ const Editor: React.FC = () => {
 
                                                 <div className={`flex align__center justify__space__between ${styles.actionRelative} ${styles.currentInteractionSelectActionSelecter}`} onClick={handleSelectorClick}>
                                                     <span className={styles.currentInteractionSelecterTitle}>
-                                                        Open Link
+                                                        {selectedAction.title}
                                                     </span>
 
                                                     <button type='button' className={styles.currentInteractionSelecterButton}>
@@ -423,7 +727,7 @@ const Editor: React.FC = () => {
                                             <div className={`flex column ${styles.selectorWrapper} ${isActionSelector ? styles.active : ''}`}>
                                                 {
                                                     actionsData.length > 0 ? actionsData.map((action: TActionData) => (
-                                                        <div className={styles.selector} key={action.id} onClick={action.actionHandler}>
+                                                        <div className={styles.selector} key={action.id} onClick={() => action.actionHandler(action)}>
                                                             {
                                                                 action.title
                                                             }
@@ -434,36 +738,88 @@ const Editor: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        <div className={`flex column align__center ${styles.currentInteractionInputContainer}`}>
-                                            <span className={styles.currentInteractionInputName}>
-                                                URL to Open
-                                            </span>
+                                        {
+                                            selectedAction.title === 'Open Link' && (
+                                                <div className={`flex column align__center ${styles.currentInteractionInputContainer}`}>
+                                                    <span className={styles.currentInteractionInputName}>
+                                                        URL to Open
+                                                    </span>
 
-                                            <input type='text' className={`${styles.currentInteractionInput} ${styles.actionChild}`} placeholder='Enter Link' />
-                                        </div>
+                                                    <input type='text' className={`${styles.currentInteractionInput} ${styles.actionChild}`} placeholder='Enter Link' onChange={(e) => setLinkToOpen(e.target.value)} />
+                                                </div>
+                                            )
+                                        }
 
                                         <div className={`flex align__center ${styles.uiSettingsContainer}`}>
-                                            <TooltipButton position='top' tooltip='Update Colors, Transitions, Animations and more'>
-                                                <div className={`flex align__center justify__center ${styles.uiSettingsButton}`}>
+                                            <TooltipButton position='top' tooltip='Update Colors'>
+                                                <div className={`flex align__center justify__center ${styles.uiSettingsButton} ${isStylingActive ? styles.active : ''}`} onClick={() => setStylingActive((prev) => !prev)}>
                                                     Styling
                                                 </div>
                                             </TooltipButton>
 
-                                            <TooltipButton position='top' tooltip='Conditional Logic, Variables, and more'>
+                                            {/* <TooltipButton position='top' tooltip='Conditional Logic, Variables, and more'>
                                                 <div className={`flex align__center justify__center ${styles.uiSettingsButton}`}>
                                                     Settings
                                                 </div>
-                                            </TooltipButton>
+                                            </TooltipButton> */}
                                         </div>
 
+                                        {isStylingActive && (
+                                            <div className={`flex column ${styles.styleSettingsContainer}`}>
+                                                <div className={`flex align__center justify__space__evenly ${styles.styleColorContainer}`}>
+                                                    {styleColorData.map((styleColor) => (
+                                                        <div
+                                                            key={styleColor.id}
+                                                            className={`flex column align__center ${styles.styleColorCard}`}
+                                                        >
+                                                            <div
+                                                                className={styles.styleColorPicker}
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        typeof styleColor.value === 'string'
+                                                                            ? styleColor.value
+                                                                            : `rgba(${styleColor.value.r}, ${styleColor.value.g}, ${styleColor.value.b}, ${styleColor.value.a})`,
+                                                                }}
+                                                                onClick={() => setActivePickerId(styleColor.id)}
+                                                            />
+
+                                                            <span className={styles.styleColorName}>
+                                                                {styleColor.name}
+                                                            </span>
+
+                                                            {activePickerId === styleColor.id && (
+                                                                <div className={styles.colorPickerContainer}>
+                                                                    <ChromePicker
+                                                                        color={
+                                                                            typeof styleColor.value === 'string'
+                                                                                ? styleColor.value
+                                                                                : styleColor.value
+                                                                        }
+                                                                        onChangeComplete={(color) => {
+                                                                            handleColorChange(styleColor.id, {
+                                                                                r: color.rgb.r,
+                                                                                g: color.rgb.g,
+                                                                                b: color.rgb.b,
+                                                                                a: color.rgb.a || 1,
+                                                                            });
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className={`flex column ${styles.buttonsContainer}`}>
-                                            <button type='button' className={styles.saveButton}>
+                                            <button type='button' className={styles.saveButton} onClick={() => handleSaveButtonValidate(false)}>
                                                 {`Save ${currentInteraction.value}`}
                                             </button>
-                                            <button type='button' className={styles.saveAndAddAnotherButton}>
+                                            <button type='button' className={styles.saveAndAddAnotherButton} onClick={() => handleSaveButtonValidate(true)}>
                                                 Save & Add Another
                                             </button>
-                                            <button type='button' className={styles.discardChangesButton} onClick={() => setCurrentInteraction(null)}>
+                                            <button type='button' className={styles.discardChangesButton} onClick={() => handleDiscardChanges(false)}>
                                                 Discard Changes
                                             </button>
                                         </div>
@@ -491,7 +847,34 @@ const Editor: React.FC = () => {
                                                         </TooltipButton>
 
                                                         <div className={`flex column ${styles.interactionCardMainAbout}`}>
-                                                            <span className={styles.interactionTitle}>{interaction.title}</span>
+                                                            <span className={styles.interactionTitle}>
+
+                                                                {
+                                                                    interaction.type === 'Button'
+                                                                        ? <div className={styles.interactionButtonPreview}
+                                                                            style={{
+                                                                                color:
+                                                                                    typeof interaction.styles?.find((item) => item.name === 'Text')?.value === 'string'
+                                                                                        ? (interaction.styles?.find((item) => item.name === 'Text')?.value as string)
+                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                                                                backgroundColor:
+                                                                                    typeof interaction.styles?.find((item) => item.name === 'Background')?.value === 'string'
+                                                                                        ? (interaction.styles?.find((item) => item.name === 'Background')?.value as string)
+                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                                                                borderColor:
+                                                                                    typeof interaction.styles?.find((item) => item.name === 'Border')?.value === 'string'
+                                                                                        ? (interaction.styles?.find((item) => item.name === 'Border')?.value as string)
+                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                                                                width: interaction.buttonProps?.width!,
+                                                                                height: interaction.buttonProps?.height!
+                                                                            }}>
+                                                                            {
+                                                                                interaction.title
+                                                                            }
+                                                                        </div>
+                                                                        : interaction.title}
+
+                                                            </span>
                                                             {
                                                                 interaction.types && (
                                                                     <div className={`flex align__center ${styles.interactionTypesContainer}`}>
@@ -536,7 +919,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonTitle={buttonTitle} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonTitle={buttonTitle} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {

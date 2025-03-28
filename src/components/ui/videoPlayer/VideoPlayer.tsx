@@ -3,6 +3,8 @@ import styles from './VideoPlayer.module.scss'
 import getImage from '../../../assets/getImage'
 import ICurrentInteraction from '../../../interfaces/ICurrentInteraction'
 import useDebounce from '../../../hooks/useDebounce'
+import IStyleColor from '../../../interfaces/IStyleColor'
+import rgbaToString from '../../../assets/rgbaToString'
 
 type TVideoPlayer = {
     currentInteraction: ICurrentInteraction,
@@ -14,7 +16,8 @@ type TVideoPlayer = {
     setVideoStarted: React.Dispatch<React.SetStateAction<boolean>>,
     setButtonProps: React.Dispatch<React.SetStateAction<{ left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }>>,
     buttonTitle: string,
-    buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }
+    buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
+    buttonStyle: IStyleColor[]
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -27,7 +30,8 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     setVideoStarted,
     setButtonProps,
     buttonTitle,
-    buttonProps
+    buttonProps,
+    buttonStyle
 }) => {
     const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 })
     const [buttonSize, setButtonSize] = useState({ width: 88, height: 56 })
@@ -266,6 +270,23 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         }
     }, [currentInteraction])
 
+    useEffect(() => {
+        console.log({
+            color:
+                typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
+                    ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
+                    : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+            backgroundColor:
+                typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
+                    ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
+                    : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+            borderColor:
+                typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
+                    ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
+                    : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
+        })
+    }, [buttonStyle])
+
     return (
         <div className={`flex align__center justify__center ${styles.videoPlayer}`}>
             <div className={styles.videoWrapper} ref={wrapperRef}>
@@ -282,7 +303,21 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                             type="button"
                             className={styles.draggableButton}
                             onMouseDown={handleDragStart}
-                            onTouchStart={handleDragStart}>
+                            onTouchStart={handleDragStart}
+                            style={{
+                                color:
+                                    typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
+                                        ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
+                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                backgroundColor:
+                                    typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
+                                        ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
+                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                borderColor:
+                                    typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
+                                        ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
+                                        : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
+                            }}>
                             {buttonTitle}
                         </button>
                         <div

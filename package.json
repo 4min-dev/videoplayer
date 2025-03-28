@@ -17,12 +17,14 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mapbox/node-pre-gyp": "^2.0.0",
     "react": "^18.2.0",
+    "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
     "@types/react": "^18.2.48",
+    "@types/react-color": "^3.0.13",
     "@types/react-dom": "^18.2.18",
     "@types/webpack": "^5.28.5",
     "css-loader": "^6.7.1",
