@@ -5,6 +5,7 @@ import ICurrentInteraction from '../../../interfaces/ICurrentInteraction'
 import useDebounce from '../../../hooks/useDebounce'
 import IStyleColor from '../../../interfaces/IStyleColor'
 import rgbaToString from '../../../assets/rgbaToString'
+import { ChromePicker } from 'react-color'
 
 type TVideoPlayer = {
     currentInteraction: ICurrentInteraction,
@@ -16,7 +17,8 @@ type TVideoPlayer = {
     setVideoStarted: React.Dispatch<React.SetStateAction<boolean>>,
     setButtonProps: React.Dispatch<React.SetStateAction<{ left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null }>>,
     buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
-    buttonStyle: IStyleColor[]
+    buttonStyle: IStyleColor[],
+    isDrawing: boolean
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -29,12 +31,82 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     setVideoStarted,
     setButtonProps,
     buttonProps,
-    buttonStyle
+    buttonStyle,
+    isDrawing
 }) => {
     const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 })
     const [buttonSize, setButtonSize] = useState({ width: 88, height: 56 })
     const buttonRef = useRef<HTMLButtonElement>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const drawingContext = useRef<CanvasRenderingContext2D | null>(null)
+    const isDrawingActive = useRef(false)
+    const [drawingColor, setDrawingColor] = useState('rgb(0, 156, 224)')
+    const [displayColorPicker, setDisplayColorPicker] = useState<boolean>(false)
+
+    const initializeCanvas = () => {
+        if (canvasRef.current) {
+            const canvas = canvasRef.current
+            const context = canvas.getContext('2d')
+            if (context) {
+                drawingContext.current = context
+                context.lineCap = 'round'
+                context.lineJoin = 'round'
+                context.lineWidth = 5
+                context.strokeStyle = drawingColor
+            }
+        }
+    }
+
+    useEffect(() => {
+        initializeCanvas();
+    }, [drawingColor])
+
+    useEffect(() => {
+        if (wrapperRef.current && canvasRef.current) {
+            const wrapperRect = wrapperRef.current.getBoundingClientRect()
+            canvasRef.current.width = wrapperRect.width
+            canvasRef.current.height = wrapperRect.height
+        }
+    }, [])
+
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isDrawing) return
+        const canvas = canvasRef.current
+
+        if (!canvas || !drawingContext.current) return
+
+        initializeCanvas()
+
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+
+        drawingContext.current.beginPath()
+        drawingContext.current.moveTo(x, y)
+        isDrawingActive.current = true
+    }
+
+    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isDrawing || !isDrawingActive.current) return
+        const canvas = canvasRef.current
+        if (!canvas || !drawingContext.current) return
+
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+
+        drawingContext.current.lineTo(x, y)
+        drawingContext.current.stroke()
+    }
+
+    const stopDrawing = () => {
+        if (!isDrawing) return
+        if (drawingContext.current) {
+            drawingContext.current.closePath()
+        }
+        isDrawingActive.current = false
+    }
 
     const constrainCoordinates = (x: number, y: number): { x: number, y: number } => {
         if (!wrapperRef.current || !buttonRef.current) return { x, y }
@@ -95,21 +167,21 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     const test = useDebounce({
         callback: () => {
             if (buttonProps.left && buttonProps.top && buttonProps.width && buttonProps.height) {
-                const newLeft = parseInt(buttonProps.left, 10);
-                const newTop = parseInt(buttonProps.top, 10);
-                const newWidth = parseInt(buttonProps.width, 10);
-                const newHeight = parseInt(buttonProps.height, 10);
+                const newLeft = parseInt(buttonProps.left, 10)
+                const newTop = parseInt(buttonProps.top, 10)
+                const newWidth = parseInt(buttonProps.width, 10)
+                const newHeight = parseInt(buttonProps.height, 10)
 
-                setButtonPosition({ x: newLeft, y: newTop });
-                setButtonSize({ width: newWidth, height: newHeight });
+                setButtonPosition({ x: newLeft, y: newTop })
+                setButtonSize({ width: newWidth, height: newHeight })
             }
         },
-        delay: 500
+        delay: 200
     })
 
     useEffect(() => {
         test()
-    }, [buttonProps]);
+    }, [buttonProps])
 
     const handleResizeStart = (
         e: React.MouseEvent | React.TouchEvent,
@@ -268,9 +340,73 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         }
     }, [currentInteraction])
 
+    const handleColorChange = (color: any) => {
+        setDrawingColor(color.hex)
+        if (drawingContext.current) {
+            drawingContext.current.strokeStyle = color.hex
+        }
+    }
+
     return (
         <div className={`flex align__center justify__center ${styles.videoPlayer}`}>
             <div className={styles.videoWrapper} ref={wrapperRef}>
+                <canvas
+                    ref={canvasRef}
+                    className={styles.drawingCanvas}
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        pointerEvents: isDrawing ? 'auto' : 'none',
+                    }}
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseLeave={stopDrawing}
+                />
+                {
+                    isDrawing && (
+                        <div className={`flex align__center justify__center ${styles.drawingColorPicker}`}>
+                            <span className={styles.drawingColorPickerTitle}>Color</span>
+                            <div
+                                style={{
+                                    width: '36px',
+                                    height: '14px',
+                                    background: drawingColor,
+                                    marginLeft: '10px',
+                                    cursor: 'pointer',
+                                    zIndex: '50',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '2px',
+                                }}
+                                onClick={() => setDisplayColorPicker(!displayColorPicker)}
+                            />
+                            {displayColorPicker && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '40px',
+                                    left: '0',
+                                    zIndex: '2',
+                                }}>
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            top: '0',
+                                            right: '0',
+                                            bottom: '0',
+                                            left: '0',
+                                        }}
+                                        onClick={() => setDisplayColorPicker(false)}
+                                    />
+                                    <ChromePicker
+                                        color={drawingColor}
+                                        onChange={handleColorChange}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
                 {currentInteraction ? (
                     <div className={styles.draggableButtonContainer} style={{
                         position: 'absolute',
@@ -291,15 +427,15 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                         color:
                                             typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number, g: number, b: number, a: number }) || '#fff',
                                         backgroundColor:
                                             typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
                                         borderColor:
                                             typeof buttonStyle.find((item) => item.name === 'Border')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Border')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff'
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Border')?.value as { r: number, g: number, b: number, a: number }) || '#fff'
                                     }}>
                                     {currentInteraction.title}
                                 </button>
@@ -318,7 +454,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                         backgroundColor:
                                             typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
                                     }}>
                                     {currentInteraction.title}
                                 </button>
@@ -337,11 +473,11 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                         color:
                                             typeof buttonStyle.find((item) => item.name === 'Text')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Text')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Text')?.value as { r: number, g: number, b: number, a: number }) || '#fff',
                                         backgroundColor:
                                             typeof buttonStyle.find((item) => item.name === 'Background')?.value === 'string'
                                                 ? (buttonStyle.find((item) => item.name === 'Background')?.value as string)
-                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
+                                                : rgbaToString(buttonStyle.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
                                     }}>
                                     {
                                         currentInteraction.title

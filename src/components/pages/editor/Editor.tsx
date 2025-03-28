@@ -6,12 +6,15 @@ import EditorVideoOverlay from './ui/videoOverlay/VideoOverlay'
 import PrimaryButton from '../../ui/buttons/primaryButton/PrimaryButton'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHandPointUp, faImage, faQuestionCircle, faSun } from '@fortawesome/free-regular-svg-icons'
-import { faBolt, faChevronDown, faEllipsisVertical, faFont, faMinus, faPlay, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
+import { IconDefinition, faBolt, faChevronDown, faFont, faMinus, faPen, faPlay, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import TooltipButton from '../../ui/buttons/tooltipButton/TooltipButton'
 import ICurrentInteraction from '../../../interfaces/ICurrentInteraction'
 import IStyleColor from '../../../interfaces/IStyleColor'
 import TPauseData from '../../../interfaces/TPauseData'
 import rgbaToString from '../../../assets/rgbaToString'
+import IInteraction from '../../../interfaces/IInteraction'
+import IButtonProps from '../../../interfaces/IButtonProps'
+import InteractionCard from './InteractionCard'
 
 type TControlButton = {
     id: number,
@@ -19,18 +22,6 @@ type TControlButton = {
     title: string,
     hint: string,
     handler: (interaction: ICurrentInteraction) => void
-}
-
-type TInteraction = {
-    id: number,
-    icon: any,
-    duration: string,
-    type: string,
-    title: string,
-    types?: { title: string, id: number, background: string, color: string }[],
-    tooltip: string,
-    buttonProps?: TButtonProps,
-    styles?: IStyleColor[]
 }
 
 type TButtonTimestamp = {
@@ -50,15 +41,8 @@ type TSelectedAction = {
     title: string
 }
 
-type TButtonProps = {
-    left: string | null,
-    top: string | null,
-    width: string | null,
-    height: string | null,
-    bottom: string | null
-}
-
 const Editor: React.FC = () => {
+    const [isDrawing, setDrawing] = useState<boolean>(false)
     const [buttonTimestamp, setButtonTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [hotspotTimestamp, setHotspotTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [textTimestamp, setTextTimestamp] = useState<TButtonTimestamp>({ startTime: null, endTime: null, total: null })
@@ -140,13 +124,27 @@ const Editor: React.FC = () => {
             icon: faPlusCircle,
             title: 'More',
             hint: 'Drawings, Media Clips, Navigations',
-            handler: () => console.log('test')
+            handler: () => handleMorePopup()
         }
     ])
+    const [moreControlsData, setMoreControlsData] = useState<{
+        id: number,
+        icon: IconDefinition,
+        title: string,
+        handler: (props?: any) => void
+    }[]>([
+        {
+            id: 1,
+            icon: faPen,
+            handler: () => setDrawing((prev) => !prev),
+            title: 'Drawing'
+        }
+    ])
+    const [isMorePopup, setMorePopup] = useState<boolean>(false)
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
     const [currentInteraction, setCurrentInteraction] = useState<ICurrentInteraction | null>(null)
-    const [interactionData, setInteractions] = useState<TInteraction[]>([])
-    const [buttonProps, setButtonProps] = useState<TButtonProps>({
+    const [interactionData, setInteractions] = useState<IInteraction[]>([])
+    const [buttonProps, setButtonProps] = useState<IButtonProps>({
         left: '200',
         top: '200',
         width: '84',
@@ -362,7 +360,7 @@ const Editor: React.FC = () => {
         return new Blob([arrayBuffer], { type: mimeString })
     }
 
-    function handleAddInteraction(interaction: TInteraction) {
+    function handleAddInteraction(interaction: IInteraction) {
         setInteractions((prev) => ([...prev, interaction]))
     }
 
@@ -995,7 +993,7 @@ const Editor: React.FC = () => {
             return {
                 ...prev,
                 title: '',
-                imgHref:''
+                imgHref: ''
             }
         })
         setSelectedImage(null)
@@ -1022,6 +1020,18 @@ const Editor: React.FC = () => {
         } else {
             console.log('Файл не выбран')
         }
+    }
+
+    function handleMorePopup() {
+        setMorePopup((prev) => !prev)
+    }
+
+    function handleDeleteInteraction(interactionId: number) {
+        setInteractions((prev) => {
+            if (!prev) return []
+
+            return prev.filter((interaction) => interaction.id !== interactionId)
+        })
     }
 
     return (
@@ -1329,69 +1339,7 @@ const Editor: React.FC = () => {
                                         </span>
                                     ) : <div className={`flex column ${styles.interactionCardsContainer}`}>
                                         {
-                                            interactionData.map((interaction) => (
-                                                <div key={interaction.id} className={`flex justify__space__between ${styles.interactionCard}`}>
-                                                    <div className={`flex justify__space__between ${styles.aboutInteractionCard}`}>
-                                                        <TooltipButton position={'top'} tooltip={interaction.tooltip}>
-                                                            <div className={`flex align__center column ${styles.interactionCardMainUi}`}>
-                                                                <span className={styles.duration}>{interaction.duration}</span>
-                                                                <FontAwesomeIcon style={{ width: '22.5px', height: '22.5px' }} icon={interaction.icon} />
-                                                                <span className={styles.interactionType}>{interaction.type}</span>
-                                                            </div>
-                                                        </TooltipButton>
-
-                                                        <div className={`flex column ${styles.interactionCardMainAbout}`}>
-                                                            <span className={styles.interactionTitle}>
-
-                                                                {
-                                                                    interaction.type === 'Button'
-                                                                        ? <div className={styles.interactionButtonPreview}
-                                                                            style={{
-                                                                                color:
-                                                                                    typeof interaction.styles?.find((item) => item.name === 'Text')?.value === 'string'
-                                                                                        ? (interaction.styles?.find((item) => item.name === 'Text')?.value as string)
-                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Text')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
-                                                                                backgroundColor:
-                                                                                    typeof interaction.styles?.find((item) => item.name === 'Background')?.value === 'string'
-                                                                                        ? (interaction.styles?.find((item) => item.name === 'Background')?.value as string)
-                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Background')?.value as { r: number; g: number; b: number; a: number }) || 'rgb(92, 75, 192)',
-                                                                                borderColor:
-                                                                                    typeof interaction.styles?.find((item) => item.name === 'Border')?.value === 'string'
-                                                                                        ? (interaction.styles?.find((item) => item.name === 'Border')?.value as string)
-                                                                                        : rgbaToString(interaction.styles?.find((item) => item.name === 'Border')?.value as { r: number; g: number; b: number; a: number }) || '#fff',
-                                                                                width: interaction.buttonProps?.width!,
-                                                                                height: interaction.buttonProps?.height!
-                                                                            }}>
-                                                                            {
-                                                                                interaction.title
-                                                                            }
-                                                                        </div>
-                                                                        : interaction.title}
-
-                                                            </span>
-                                                            {
-                                                                interaction.types && (
-                                                                    <div className={`flex align__center ${styles.interactionTypesContainer}`}>
-                                                                        {
-                                                                            interaction.types.map((interactionType) => (
-                                                                                <div key={interactionType.id} className={`flex align__center justify__center ${styles.interactionType}`} style={{ background: interactionType.background, color: interactionType.color }}>
-                                                                                    {
-                                                                                        interactionType.title
-                                                                                    }
-                                                                                </div>
-                                                                            ))
-                                                                        }
-                                                                    </div>
-                                                                )
-                                                            }
-                                                        </div>
-                                                    </div>
-
-                                                    <TooltipButton position='left' tooltip='Edit, Copy, Delete, and More' buttonClassname={styles.interactionButton} wrapperClassname={styles.interactionButtonContainer}>
-                                                        <FontAwesomeIcon icon={faEllipsisVertical} style={{ width: '21px', height: '21px' }} />
-                                                    </TooltipButton>
-                                                </div>
-                                            ))
+                                            interactionData.map((interaction) => <InteractionCard key={interaction.id} interaction={interaction} handleDeleteInteraction={handleDeleteInteraction} />)
                                         }
                                     </div>
                             }
@@ -1413,7 +1361,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {
@@ -1533,12 +1481,28 @@ const Editor: React.FC = () => {
                                 </div>
                             )
                                 : controlsData.length > 0 &&
-                                controlsData.map((controlButton) => (
-                                    <TooltipButton key={controlButton.id} position='bottom' tooltip={controlButton.hint} buttonClassname={styles.controlButton} wrapperClassname={styles.controlButtonWrapper} handleMouseClick={controlButton.handler}>
-                                        <FontAwesomeIcon icon={controlButton.icon} />
-                                        <span className={styles.controlButtonText}>{controlButton.title}</span>
-                                    </TooltipButton>
-                                ))
+                                <>
+                                    <div className={`flex ${styles.morePopupWrapper} ${isMorePopup ? styles.active : ''}`}>
+                                        {
+                                            moreControlsData.map((moreControlButton) => (
+                                                <button key={moreControlButton.id} type='button' className={`flex align__center justify__center ${styles.moreControlButton}`} onClick={moreControlButton.handler}>
+                                                    <FontAwesomeIcon icon={moreControlButton.icon} />
+                                                    <span className={styles.moreControlButtonTitle}>
+                                                        {moreControlButton.title}
+                                                    </span>
+                                                </button>
+                                            ))
+                                        }
+                                    </div>
+                                    {
+                                        controlsData.map((controlButton) => (
+                                            <TooltipButton key={controlButton.id} position='bottom' tooltip={controlButton.hint} buttonClassname={styles.controlButton} wrapperClassname={styles.controlButtonWrapper} handleMouseClick={controlButton.handler}>
+                                                <FontAwesomeIcon icon={controlButton.icon} />
+                                                <span className={styles.controlButtonText}>{controlButton.title}</span>
+                                            </TooltipButton>
+                                        ))
+                                    }
+                                </>
                         }
                     </div>
                 }
