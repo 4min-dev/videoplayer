@@ -21,7 +21,7 @@ type TVideoPlayer = {
     isDrawing: boolean,
     newComment: string,
     currentTimelineInteractions: ICurrentInteraction[],
-    setIsVideoPaused:React.Dispatch<React.SetStateAction<boolean>>
+    setIsVideoPaused: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -424,8 +424,8 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     }, [pauseDuration, remainingPauseTime])
 
     useEffect(() => {
-        if (pauseDuration > 0) {
-            const percentage = (remainingPauseTime / pauseDuration) * 100
+        if (pauseDuration >= 0) {
+            const percentage = pauseDuration === 0 ? 0 : (remainingPauseTime / pauseDuration) * 100
             setLineWidthPercentage(percentage)
 
             if (percentage > 0) {
@@ -669,8 +669,15 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                             ref={buttonRef}
                                             type="button"
                                             className={styles.draggableButton}
-                                            onMouseDown={handleDragStart}
-                                            onTouchStart={handleDragStart}
+                                            onClick={() => {
+                                                if (currentTimelineInteraction.pauseDuration === '999999999999') {
+                                                    setPauseDuration(0)
+                                                }
+
+                                                if (currentTimelineInteraction.clickHandler) {
+                                                    currentTimelineInteraction.clickHandler()
+                                                }
+                                            }}
                                             style={{
                                                 left: `${currentTimelineInteraction.buttonProps.left}`,
                                                 top: `${currentTimelineInteraction.buttonProps.top}`,
@@ -701,8 +708,16 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                                 ref={buttonRef}
                                                 type="button"
                                                 className={styles.draggableHotspot}
-                                                onMouseDown={handleDragStart}
-                                                onTouchStart={handleDragStart}
+                                                onClick={() => {
+                                                    if (currentTimelineInteraction.pauseDuration === '999999999999') {
+                                                        setPauseDuration(0)
+                                                    }
+
+                                                    if (currentTimelineInteraction.clickHandler) {
+                                                        currentTimelineInteraction.clickHandler()
+                                                    }
+                                                }}
+
                                                 style={{
                                                     left: `${currentTimelineInteraction.buttonProps.left}`,
                                                     top: `${currentTimelineInteraction.buttonProps.top}`,
@@ -724,8 +739,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                                 ref={buttonRef}
                                                 type="button"
                                                 className={`flex align__center justify__center text__center ${styles.draggableText}`}
-                                                onMouseDown={handleDragStart}
-                                                onTouchStart={handleDragStart}
+
                                                 style={{
                                                     left: `${currentTimelineInteraction.buttonProps.left}`,
                                                     top: `${currentTimelineInteraction.buttonProps.top}`,
@@ -753,12 +767,20 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                                                 ref={buttonRef}
                                                 type="button"
                                                 className={`flex align__center justify__center text__center ${styles.draggableImage}`}
-                                                onMouseDown={handleDragStart}
-                                                onTouchStart={handleDragStart} style={{
+                                                style={{
                                                     left: `${currentTimelineInteraction.buttonProps.left}`,
                                                     top: `${currentTimelineInteraction.buttonProps.top}`,
                                                     width: `${currentTimelineInteraction.buttonProps.width}`,
                                                     height: `${currentTimelineInteraction.buttonProps.height}`,
+                                                }}
+                                                onClick={() => {
+                                                    if (currentTimelineInteraction.pauseDuration === '999999999999') {
+                                                        setPauseDuration(0)
+                                                    }
+
+                                                    if (currentTimelineInteraction.clickHandler) {
+                                                        currentTimelineInteraction.clickHandler()
+                                                    }
                                                 }}>
                                                 {currentTimelineInteraction.imgHref && (
                                                     <img src={currentTimelineInteraction.imgHref} alt={`${currentTimelineInteraction.id}_img`} />

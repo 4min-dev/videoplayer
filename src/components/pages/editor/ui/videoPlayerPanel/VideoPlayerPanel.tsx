@@ -250,10 +250,10 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     }, [playBack])
 
     useEffect(() => {
-        if (!videoRef.current) return;
+        if (!videoRef.current) return
 
         const handleTimeUpdate = () => {
-            const currentTime = videoRef.current?.currentTime;
+            const currentTime = videoRef.current?.currentTime
 
             if(!currentTime) return
 
@@ -265,12 +265,10 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                 console.log(interactionStartTimeInSeconds)
                 console.log(interactionEndTimeInSeconds)
 
-                // Проверяем, находится ли текущее время в диапазоне интерактива
                 if (
                     currentTime >= interactionStartTimeInSeconds &&
                     currentTime <= interactionEndTimeInSeconds
                 ) {
-                    // Добавляем интерактив в массив
                     handleSetCurrentTimelineInteraction({
                         id: interaction.id,
                         endTime: interaction.endTime,
@@ -282,25 +280,25 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                         value: interaction.type.toLowerCase(),
                         imgHref: interaction.imgHref,
                         styles:interaction.styles || [],
-                        buttonProps:interaction.buttonProps! || []
-                    });
+                        buttonProps:interaction.buttonProps! || [],
+                        clickHandler:interaction.clickHandler
+                    })
                 } else {
-                    // Удаляем интерактив из массива, если время вышло за пределы
-                    handleRemoveCurrentTimelineInteraction(interaction.id);
+                    handleRemoveCurrentTimelineInteraction(interaction.id)
                 }
-            });
-        };
+            })
+        }
 
-        videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
+        videoRef.current.addEventListener("timeupdate", handleTimeUpdate)
 
         return () => {
-            videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
-        };
-    }, [interactionsData]);
+            videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate)
+        }
+    }, [interactionsData])
     const timeToSeconds = (time: string): number => {
-        const [minutes, seconds] = time.split(':').map(Number);
-        return minutes * 60 + seconds;
-    };
+        const [minutes, seconds] = time.split(':').map(Number)
+        return minutes * 60 + seconds
+    }
 
     const markers = interactionsData.map((interaction) => {
         const markerTimeInSeconds = timeToSeconds(interaction.duration)
@@ -406,7 +404,8 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                                 type: 'Comment',
                                 tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${commentTimestamp.endTime}`,
                                 endTime: '00:17',
-                                isPause:false
+                                isPause:false,
+                                clickHandler:() => ''
                             })
                         }
                     }}

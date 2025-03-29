@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ChromePicker } from 'react-color'
 import Aside from './ui/aside/Aside'
 import styles from './Editor.module.scss'
@@ -16,27 +16,34 @@ import IInteraction from '../../../interfaces/IInteraction'
 import IButtonProps from '../../../interfaces/IButtonProps'
 import InteractionCard from './InteractionCard'
 import IButtonTimestamp from '../../../interfaces/IButtonTimestamp'
+import playVideo from '../../../assets/playVideo'
 
 type TControlButton = {
     id: number,
     icon: any,
     title: string,
     hint: string,
-    handler: (interaction: ICurrentInteraction) => void
+    handler?: (interaction: ICurrentInteraction) => void
 }
 
 type TActionData = {
     id: number,
     title: string,
+    clickHandler: () => void,
     actionHandler: (props?: any) => void
 }
 
 type TSelectedAction = {
     id: number | null,
+    handler?: () => void,
+    clickHandler: () => void,
     title: string
 }
 
 const Editor: React.FC = () => {
+    const videoRef = useRef<HTMLVideoElement | null>(null)
+    const [isVideoStarted, setVideoStarted] = useState<boolean>(false)
+    const [isVideoPaused, setIsVideoPaused] = useState<boolean>(true)
     const [isDrawing, setDrawing] = useState<boolean>(false)
     const [buttonTimestamp, setButtonTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
     const [hotspotTimestamp, setHotspotTimestamp] = useState<IButtonTimestamp>({ startTime: null, endTime: null, total: null })
@@ -52,18 +59,25 @@ const Editor: React.FC = () => {
             title: 'Button',
             hint: 'Add Button',
             handler: () => {
-                handleAddNewButton({
-                    id: Date.now(),
-                    isPause: false,
-                    startTime: buttonTimestamp.startTime!,
-                    endTime: buttonTimestamp.endTime!,
-                    value: 'button',
-                    title: '',
-                    icon: faHandPointUp,
-                    styles: styleColorData || [],
-                    buttonProps: buttonProps || [],
-                    pauseDuration:selectedPause.value
-                })
+                if (!isVideoStarted) {
+                    setVideoStarted(true)
+                    playVideo(videoRef.current!, setIsVideoPaused)
+
+                    setTimeout(() => {
+                        handleAddNewButton({
+                            id: Date.now(),
+                            isPause: false,
+                            startTime: buttonTimestamp.startTime!,
+                            endTime: buttonTimestamp.endTime!,
+                            value: 'button',
+                            title: '',
+                            icon: faHandPointUp,
+                            styles: styleColorData || [],
+                            buttonProps: buttonProps || [],
+                            pauseDuration: selectedPause.value
+                        })
+                    }, 200);
+                }
             }
         },
         {
@@ -81,7 +95,7 @@ const Editor: React.FC = () => {
                 icon: faSun,
                 styles: styleColorData || [],
                 buttonProps: buttonProps || [],
-                pauseDuration:selectedPause.value
+                pauseDuration: selectedPause.value
             })
         },
         {
@@ -99,7 +113,7 @@ const Editor: React.FC = () => {
                 icon: faImage,
                 styles: styleColorData || [],
                 buttonProps: buttonProps || [],
-                pauseDuration:selectedPause.value
+                pauseDuration: selectedPause.value
             })
         },
         {
@@ -117,7 +131,7 @@ const Editor: React.FC = () => {
                 icon: faFont,
                 styles: styleColorData || [],
                 buttonProps: buttonProps || [],
-                pauseDuration:selectedPause.value
+                pauseDuration: selectedPause.value
             })
         },
         {
@@ -157,36 +171,39 @@ const Editor: React.FC = () => {
     })
     const [linkToOpen, setLinkToOpen] = useState<string>('')
     const [isActionSelector, setIsActionSelector] = useState<boolean>(false)
-    const [selectedAction, setSelectedAction] = useState<TSelectedAction>({ id: 3, title: 'None' })
+    const [selectedAction, setSelectedAction] = useState<TSelectedAction>({ id: 3, title: 'None', clickHandler: () => '' })
     const [actionsData, setActionsData] = useState<TActionData[]>([
         {
             id: 1,
             title: 'Continue',
+            clickHandler: () => '',
             actionHandler: (action: TSelectedAction) => selectActionHandler(action)
         },
 
         {
             id: 2,
             title: 'Open Link',
+            clickHandler: () => window.location.href = linkToOpen,
             actionHandler: (action: TSelectedAction) => selectActionHandler(action)
         },
 
         {
             id: 3,
             title: 'None',
+            clickHandler: () => '',
             actionHandler: (action: TSelectedAction) => selectActionHandler(action)
         }
     ])
     const [styleColorData, setStyleColorData] = useState<IStyleColor[]>([])
     const [isStylingActive, setStylingActive] = useState<boolean>(false)
     const [activePickerId, setActivePickerId] = useState<number | null>(null)
-    const [selectedPause, setSelectedPause] = useState<TPauseData>({ id: 1, name: 'Until Viewer Click', value: 'click' })
+    const [selectedPause, setSelectedPause] = useState<TPauseData>({ id: 1, name: 'Until Viewer Click', value: '999999999999' })
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const [newComment, setNewComment] = useState<string>('')
     const [pauseData, setPauseData] = useState<TPauseData[]>([
         {
             id: 1,
-            value: 'click',
+            value: '999999999999',
             name: 'Until Viewer Click',
             actionHandler: (action: TPauseData) => pauseActionHandler(action)
         },
@@ -311,7 +328,7 @@ const Editor: React.FC = () => {
     }
 
     function selectActionHandler(action: TSelectedAction) {
-        setSelectedAction({ id: action.id, title: action.title })
+        setSelectedAction({ id: action.id, title: action.title, clickHandler: action.clickHandler })
         setIsActionSelector(false)
     }
 
@@ -380,7 +397,8 @@ const Editor: React.FC = () => {
             icon: faHandPointUp,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -395,7 +413,8 @@ const Editor: React.FC = () => {
             icon: faSun,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -410,7 +429,8 @@ const Editor: React.FC = () => {
             icon: faFont,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -425,7 +445,8 @@ const Editor: React.FC = () => {
             icon: faImage,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -444,7 +465,8 @@ const Editor: React.FC = () => {
             icon: faHandPointUp,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -459,7 +481,8 @@ const Editor: React.FC = () => {
             icon: faSun,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -474,7 +497,8 @@ const Editor: React.FC = () => {
             icon: faFont,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -489,7 +513,8 @@ const Editor: React.FC = () => {
             icon: faImage,
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
-            pauseDuration:interaction.pauseDuration
+            pauseDuration: interaction.pauseDuration,
+            clickHandler: interaction.clickHandler
         })
     }
 
@@ -505,7 +530,8 @@ const Editor: React.FC = () => {
                 type: interaction.type,
                 tooltip: interaction.tooltip,
                 endTime: interaction.endTime!,
-                isPause:false
+                isPause: false,
+                clickHandler: () => ''
             });
             setNewComment('')
         } else {
@@ -907,8 +933,11 @@ const Editor: React.FC = () => {
                         type: 'Button',
                         types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
                         endTime: buttonTimestamp.endTime!,
-                        isPause:currentInteraction.isPause,
-                        pauseDuration:selectedPause.value
+                        isPause: currentInteraction.isPause,
+                        pauseDuration: selectedPause.value,
+                        buttonProps: buttonProps,
+                        styles: styleColorData,
+                        clickHandler: () => window.location.href = linkToOpen
                     })
                 } else if (currentInteraction?.value === 'hotspot') {
                     handleAddInteraction({
@@ -920,8 +949,11 @@ const Editor: React.FC = () => {
                         type: 'Hotspot',
                         types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
                         endTime: hotspotTimestamp.endTime!,
-                        isPause:currentInteraction.isPause,
-                        pauseDuration:selectedPause.value
+                        isPause: currentInteraction.isPause,
+                        pauseDuration: selectedPause.value,
+                        buttonProps: buttonProps,
+                        styles: styleColorData,
+                        clickHandler: () => window.location.href = linkToOpen
                     })
                 } else if (currentInteraction?.value === 'text') {
                     handleAddInteraction({
@@ -933,8 +965,10 @@ const Editor: React.FC = () => {
                         type: 'Text',
                         types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
                         endTime: textTimestamp.endTime!,
-                        isPause:currentInteraction.isPause,
-                        pauseDuration:selectedPause.value
+                        isPause: currentInteraction.isPause,
+                        pauseDuration: selectedPause.value,
+                        buttonProps: buttonProps,
+                        styles: styleColorData
                     })
                 }
 
@@ -949,8 +983,11 @@ const Editor: React.FC = () => {
                     type: 'Image',
                     types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
                     endTime: imageTimestamp.endTime!,
-                    isPause:currentInteraction.isPause,
-                    pauseDuration:selectedPause.value
+                    isPause: currentInteraction.isPause,
+                    pauseDuration: selectedPause.value,
+                    buttonProps: buttonProps,
+                    styles: styleColorData,
+                    clickHandler: () => window.location.href = linkToOpen
                 })
 
                 handleDiscardChanges(isAddAnother)
@@ -969,8 +1006,9 @@ const Editor: React.FC = () => {
                     buttonProps: buttonProps,
                     styles: styleColorData,
                     endTime: hotspotTimestamp.endTime!,
-                    isPause:currentInteraction.isPause,
-                    pauseDuration:selectedPause.value
+                    isPause: currentInteraction.isPause,
+                    pauseDuration: selectedPause.value,
+                    clickHandler: currentInteraction.clickHandler!
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.value === 'text' && currentInteraction.title !== '') {
@@ -984,8 +1022,9 @@ const Editor: React.FC = () => {
                     buttonProps: buttonProps,
                     styles: styleColorData,
                     endTime: textTimestamp.endTime!,
-                    isPause:currentInteraction.isPause,
-                    pauseDuration:selectedPause.value
+                    isPause: currentInteraction.isPause,
+                    pauseDuration: selectedPause.value,
+                    clickHandler: currentInteraction.clickHandler!
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.title !== '' && currentInteraction?.value === 'button') {
@@ -999,8 +1038,9 @@ const Editor: React.FC = () => {
                     buttonProps: buttonProps,
                     styles: styleColorData,
                     endTime: buttonTimestamp.endTime!,
-                    isPause:currentInteraction.isPause,
-                    pauseDuration:selectedPause.value
+                    isPause: currentInteraction.isPause,
+                    pauseDuration: selectedPause.value,
+                    clickHandler: currentInteraction.clickHandler!
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.value === 'image' && selectedImage) {
@@ -1014,8 +1054,9 @@ const Editor: React.FC = () => {
                     buttonProps: buttonProps,
                     styles: styleColorData,
                     endTime: imageTimestamp.endTime!,
-                    isPause:currentInteraction.isPause,
-                    pauseDuration:selectedPause.value
+                    isPause: currentInteraction.isPause,
+                    pauseDuration: selectedPause.value,
+                    clickHandler: currentInteraction.clickHandler!
                 })
 
                 handleDiscardChanges(isAddAnother)
@@ -1066,8 +1107,7 @@ const Editor: React.FC = () => {
             height: '48',
             bottom: '200'
         })
-        setSelectedAction({ id: 3, title: 'None' })
-        setLinkToOpen('')
+        setSelectedAction({ id: 3, title: 'None', clickHandler: () => '' })
         setStyleColorData(colorData)
         setCurrentInteraction((prev) => {
             if (!prev) return null
@@ -1331,7 +1371,7 @@ const Editor: React.FC = () => {
                                                         URL to Open
                                                     </span>
 
-                                                    <input type='text' className={`${styles.currentInteractionInput} ${styles.actionChild}`} placeholder='Enter Link' onChange={(e) => setLinkToOpen(e.target.value)} />
+                                                    <input type='text' value={linkToOpen} className={`${styles.currentInteractionInput} ${styles.actionChild}`} placeholder='Enter Link' onChange={(e) => setLinkToOpen(e.target.value)} />
                                                 </div>
                                             )
                                         }
@@ -1447,7 +1487,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} interactionsData={interactionData} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} interactionsData={interactionData} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} isVideoPaused={isVideoPaused} setIsVideoPaused={setIsVideoPaused} videoRef={videoRef}/>
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {

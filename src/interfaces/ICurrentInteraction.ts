@@ -18,5 +18,6 @@ export default interface ICurrentInteraction {
         width: string | null, 
         height: string | null, 
         bottom:string | null
-    }
+    },
+    clickHandler?:() => void
 }

@@ -14,5 +14,6 @@ export default interface IInteraction {
     styles?: IStyleColor[],
     isPause:boolean,
     pauseDuration?:string,
-    imgHref?:string
+    imgHref?:string,
+    clickHandler?:() => void
 }

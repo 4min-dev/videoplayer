@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { SetStateAction, useEffect, useState } from 'react'
 import styles from './VideoOverlay.module.scss'
 import VideoPlayer from '../../../../ui/videoPlayer/VideoPlayer'
 import VideoPlayerPanel from '../videoPlayerPanel/VideoPlayerPanel'
@@ -6,6 +6,8 @@ import ICurrentInteraction from '../../../../../interfaces/ICurrentInteraction'
 import IStyleColor from '../../../../../interfaces/IStyleColor'
 import IButtonTimestamp from '../../../../../interfaces/IButtonTimestamp'
 import IInteraction from '../../../../../interfaces/IInteraction'
+import playVideo from '../../../../../assets/playVideo'
+import pauseVideo from '../../../../../assets/pauseVideo'
 
 type TEditorVideoOverlay = {
   videoUrl: string,
@@ -21,26 +23,17 @@ type TEditorVideoOverlay = {
   handleChangeAddComment:(event:React.ChangeEvent<HTMLInputElement>) => void,
   handleAddCommentInteraction:(interaction:IInteraction) => void,
   commentTimestamp:IButtonTimestamp,
-  interactionsData:IInteraction[]
+  interactionsData:IInteraction[],
+  isVideoStarted:boolean,
+  setVideoStarted:React.Dispatch<SetStateAction<boolean>>,
+  videoRef: React.RefObject<HTMLVideoElement>,
+  isVideoPaused:boolean,
+  setIsVideoPaused:React.Dispatch<SetStateAction<boolean>>
 }
 
-const EditorVideoOverlay: React.FC<TEditorVideoOverlay> = ({ videoUrl, handleFullscreenToggle, isFullscreen, currentInteraction, setButtonProps, buttonProps, handleSetTimestampButton, buttonStyle, isDrawing, newComment, handleChangeAddComment, handleAddCommentInteraction, commentTimestamp, interactionsData }) => {
-
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const [isVideoPaused, setIsVideoPaused] = useState<boolean>(true)
+const EditorVideoOverlay: React.FC<TEditorVideoOverlay> = ({ videoUrl, handleFullscreenToggle, isFullscreen, currentInteraction, setButtonProps, buttonProps, handleSetTimestampButton, buttonStyle, isDrawing, newComment, handleChangeAddComment, handleAddCommentInteraction, commentTimestamp, interactionsData, isVideoStarted, setVideoStarted, videoRef, isVideoPaused, setIsVideoPaused }) => {
   const [isVideoPauseByDirection, setIsVideoPausedByDirection] = useState<boolean>(false)
-  const [isVideoStarted, setVideoStarted] = useState<boolean>(false)
   const [currentTimelineInteractions, setCurrentTimelineInteractions] = useState<ICurrentInteraction[] | []>([])
-
-  function playVideo(videoRef: HTMLVideoElement) {
-    videoRef.play()
-    setIsVideoPaused(false)
-  }
-
-  function pauseVideo(videoRef: HTMLVideoElement) {
-    videoRef.pause()
-    setIsVideoPaused(true)
-  }
 
   function handleSetCurrentTimelineInteraction(interaction: ICurrentInteraction) {
     setCurrentTimelineInteractions((prev) => {
@@ -66,9 +59,9 @@ useEffect(() => {
 
   return (
     <div className={`flex column align__center ${styles.editorVideoOverlay} ${isFullscreen ? styles.fullScreen : ''}`}>
-      <VideoPlayer currentInteraction={currentInteraction} videoUrl={videoUrl} playVideo={playVideo} pauseVideo={pauseVideo} videoRef={videoRef} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} setButtonProps={setButtonProps} buttonProps={buttonProps} buttonStyle={buttonStyle} isDrawing={isDrawing} newComment={newComment} currentTimelineInteractions={currentTimelineInteractions} setIsVideoPaused={setIsVideoPausedByDirection}/>
+      <VideoPlayer currentInteraction={currentInteraction} videoUrl={videoUrl} playVideo={() => playVideo(videoRef?.current!, setIsVideoPaused)} pauseVideo={() => pauseVideo(videoRef.current!, setIsVideoPaused)} videoRef={videoRef} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} setButtonProps={setButtonProps} buttonProps={buttonProps} buttonStyle={buttonStyle} isDrawing={isDrawing} newComment={newComment} currentTimelineInteractions={currentTimelineInteractions} setIsVideoPaused={setIsVideoPausedByDirection}/>
       {
-        (!currentInteraction && isVideoStarted && !isVideoPauseByDirection) && <VideoPlayerPanel interactionsData={interactionsData} isVideoPaused={isVideoPaused} playVideo={playVideo} pauseVideo={pauseVideo} videoRef={videoRef} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} handleSetTimestampButton={handleSetTimestampButton} handleChangeAddComment={handleChangeAddComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} newComment={newComment} handleSetCurrentTimelineInteraction={handleSetCurrentTimelineInteraction} handleRemoveCurrentTimelineInteraction={handleRemoveCurrentTimelineInteraction}/>
+        (!currentInteraction && isVideoStarted && !isVideoPauseByDirection) && <VideoPlayerPanel interactionsData={interactionsData} isVideoPaused={isVideoPaused} playVideo={() => playVideo(videoRef.current!, setIsVideoPaused)} pauseVideo={() => pauseVideo(videoRef.current!, setIsVideoPaused)} videoRef={videoRef} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} handleSetTimestampButton={handleSetTimestampButton} handleChangeAddComment={handleChangeAddComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} newComment={newComment} handleSetCurrentTimelineInteraction={handleSetCurrentTimelineInteraction} handleRemoveCurrentTimelineInteraction={handleRemoveCurrentTimelineInteraction}/>
       }
     </div>
   )
