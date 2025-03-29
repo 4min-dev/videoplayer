@@ -91,7 +91,7 @@ const InteractionCard: React.FC<TInteractionCard> = ({ interaction, handleDelete
                     </div>
                 </div>
 
-                <TooltipButton position='left' tooltip='Edit, Copy, Delete, and More' buttonClassname={styles.interactionButton} wrapperClassname={styles.interactionButtonContainer} handleMouseClick={() => setControlMenu((prev) => !prev)}>
+                <TooltipButton position='left' tooltip='Delete' buttonClassname={styles.interactionButton} wrapperClassname={styles.interactionButtonContainer} handleMouseClick={() => setControlMenu((prev) => !prev)}>
                     <FontAwesomeIcon icon={faEllipsisVertical} style={{ width: '21px', height: '21px' }} />
                 </TooltipButton>
             </div>

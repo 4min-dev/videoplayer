@@ -19,7 +19,9 @@ type TVideoPlayer = {
     buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
     buttonStyle: IStyleColor[],
     isDrawing: boolean,
-    newComment: string
+    newComment: string,
+    currentTimelineInteractions: ICurrentInteraction[],
+    setIsVideoPaused:React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -34,8 +36,15 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     buttonProps,
     buttonStyle,
     isDrawing,
-    newComment
+    newComment,
+    currentTimelineInteractions,
+    setIsVideoPaused
 }) => {
+    const [isLineVisibility, setIsLineVisibility] = useState<boolean>(false)
+    const [remainingPauseTime, setRemainingPauseTime] = useState<number>(0)
+    const [pauseDuration, setPauseDuration] = useState<number>(0)
+    const [activePauseId, setActivePauseId] = useState<string | number | null>(null)
+    const [lineWidthPercentage, setLineWidthPercentage] = useState(100)
     const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 })
     const [buttonSize, setButtonSize] = useState({ width: 88, height: 56 })
     const buttonRef = useRef<HTMLButtonElement>(null)
@@ -61,7 +70,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     }
 
     useEffect(() => {
-        initializeCanvas();
+        initializeCanvas()
     }, [drawingColor])
 
     useEffect(() => {
@@ -305,7 +314,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
 
     const handlePlayClick = () => {
 
-        if (currentInteraction) return
+        if (currentInteraction || (remainingPauseTime / pauseDuration) * 100 > 0) return
 
         if (!isVideoStarted) {
             setVideoStarted(true)
@@ -365,8 +374,90 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         }
     }
 
+    const timeToSeconds = (time: string) => {
+        const [minutes, seconds] = time.split(":").map(Number)
+        return minutes * 60 + seconds
+    }
+
+    useEffect(() => {
+        if (currentTimelineInteractions.length > 0) {
+            const currentTime = videoRef.current?.currentTime || 0
+
+            currentTimelineInteractions.forEach((interaction) => {
+                const startTimeInSeconds = timeToSeconds(interaction.startTime)
+                const pauseDurationInSeconds = parseInt(interaction.pauseDuration!, 10)
+
+                if (
+                    interaction.isPause &&
+                    interaction.pauseDuration &&
+                    interaction.startTime &&
+                    currentTime >= startTimeInSeconds &&
+                    currentTime < startTimeInSeconds + pauseDurationInSeconds
+                ) {
+
+                    if (activePauseId === interaction.id && currentTimelineInteractions.length > 1) return
+
+                    setActivePauseId(interaction.id)
+                    setPauseDuration(pauseDurationInSeconds)
+                    setRemainingPauseTime(pauseDurationInSeconds - (currentTime - startTimeInSeconds))
+                }
+            })
+        }
+    }, [currentTimelineInteractions])
+
+
+    useEffect(() => {
+        if (pauseDuration > 0 && remainingPauseTime > 0) {
+            const intervalId = setInterval(() => {
+                setRemainingPauseTime((prev) => {
+                    if (prev <= 0) {
+                        clearInterval(intervalId)
+                        setActivePauseId(null)
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+
+            return () => clearInterval(intervalId)
+        }
+    }, [pauseDuration, remainingPauseTime])
+
+    useEffect(() => {
+        if (pauseDuration > 0) {
+            const percentage = (remainingPauseTime / pauseDuration) * 100
+            setLineWidthPercentage(percentage)
+
+            if (percentage > 0) {
+                setIsLineVisibility(true)
+                pauseVideo(videoRef.current!)
+                setIsVideoPaused(true)
+            } else {
+                setIsLineVisibility(false)
+                playVideo(videoRef.current!)
+                setIsVideoPaused(false)
+
+                setPauseDuration(0)
+                setRemainingPauseTime(0)
+            }
+        }
+    }, [remainingPauseTime, pauseDuration])
+
     return (
         <div className={`flex align__center justify__center ${styles.videoPlayer}`}>
+
+            {isLineVisibility && (
+                <div className={styles.pauseDurationLineWrapper}>
+                    <div
+                        className={styles.pauseDurationLine}
+                        style={{
+                            width: "100%",
+                            clipPath: `inset(0 ${50 - lineWidthPercentage / 2}% 0 ${50 - lineWidthPercentage / 2}%)`,
+                        }}
+                    ></div>
+                </div>
+            )}
+
             <div className={styles.videoWrapper} ref={wrapperRef}>
                 {
                     newComment !== '' && (
@@ -568,16 +659,130 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                         ></div>
                     </div>
                 ) : (
-                    (!isVideoStarted &&
-                        !currentInteraction && !isDrawing) && (
-                        <button
-                            type="button"
-                            className={`flex align__center justify__center ${styles.playButton}`}
-                            onClick={handlePlayClick}
-                        >
-                            <img src={getImage('play-filled.png')} alt="Play" />
-                        </button>
-                    )
+                    <>
+                        {
+                            (currentTimelineInteractions.length > 0) &&
+                            currentTimelineInteractions.map((currentTimelineInteraction) =>
+                                <>
+                                    {currentTimelineInteraction && currentTimelineInteraction.value === 'button' && (
+                                        <button
+                                            ref={buttonRef}
+                                            type="button"
+                                            className={styles.draggableButton}
+                                            onMouseDown={handleDragStart}
+                                            onTouchStart={handleDragStart}
+                                            style={{
+                                                left: `${currentTimelineInteraction.buttonProps.left}`,
+                                                top: `${currentTimelineInteraction.buttonProps.top}`,
+                                                width: `${currentTimelineInteraction.buttonProps.width}`,
+                                                height: `${currentTimelineInteraction.buttonProps.height}`,
+                                                color:
+                                                    typeof currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value === 'string'
+                                                        ? (currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value as string)
+                                                        : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value as { r: number, g: number, b: number, a: number }) || '#fff',
+                                                backgroundColor:
+                                                    typeof currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value === 'string'
+                                                        ? (currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as string)
+                                                        : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
+                                                borderColor:
+                                                    typeof currentTimelineInteraction.styles.find((item) => item.name === 'Border')?.value === 'string'
+                                                        ? (currentTimelineInteraction.styles.find((item) => item.name === 'Border')?.value as string)
+                                                        : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Border')?.value as { r: number, g: number, b: number, a: number }) || '#fff'
+                                            }}>
+                                            {currentTimelineInteraction.title}
+                                        </button>
+                                    )
+                                    }
+
+
+                                    {
+                                        currentTimelineInteraction && currentTimelineInteraction.value === 'hotspot' && (
+                                            <button
+                                                ref={buttonRef}
+                                                type="button"
+                                                className={styles.draggableHotspot}
+                                                onMouseDown={handleDragStart}
+                                                onTouchStart={handleDragStart}
+                                                style={{
+                                                    left: `${currentTimelineInteraction.buttonProps.left}`,
+                                                    top: `${currentTimelineInteraction.buttonProps.top}`,
+                                                    width: `${currentTimelineInteraction.buttonProps.width}`,
+                                                    height: `${currentTimelineInteraction.buttonProps.height}`,
+                                                    backgroundColor:
+                                                        typeof currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value === 'string'
+                                                            ? (currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as string)
+                                                            : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
+                                                }}>
+                                                {currentTimelineInteraction.title}
+                                            </button>
+                                        )
+                                    }
+
+                                    {
+                                        currentTimelineInteraction && currentTimelineInteraction.value === 'text' && (
+                                            <button
+                                                ref={buttonRef}
+                                                type="button"
+                                                className={`flex align__center justify__center text__center ${styles.draggableText}`}
+                                                onMouseDown={handleDragStart}
+                                                onTouchStart={handleDragStart}
+                                                style={{
+                                                    left: `${currentTimelineInteraction.buttonProps.left}`,
+                                                    top: `${currentTimelineInteraction.buttonProps.top}`,
+                                                    width: `${currentTimelineInteraction.buttonProps.width}`,
+                                                    height: `${currentTimelineInteraction.buttonProps.height}`,
+                                                    color:
+                                                        typeof currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value === 'string'
+                                                            ? (currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value as string)
+                                                            : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Text')?.value as { r: number, g: number, b: number, a: number }) || '#fff',
+                                                    backgroundColor:
+                                                        typeof currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value === 'string'
+                                                            ? (currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as string)
+                                                            : rgbaToString(currentTimelineInteraction.styles.find((item) => item.name === 'Background')?.value as { r: number, g: number, b: number, a: number }) || 'rgb(92, 75, 192)',
+                                                }}>
+                                                {
+                                                    currentTimelineInteraction.title
+                                                }
+                                            </button>
+                                        )
+                                    }
+
+                                    {
+                                        currentTimelineInteraction && currentTimelineInteraction.value === 'image' && (
+                                            <button
+                                                ref={buttonRef}
+                                                type="button"
+                                                className={`flex align__center justify__center text__center ${styles.draggableImage}`}
+                                                onMouseDown={handleDragStart}
+                                                onTouchStart={handleDragStart} style={{
+                                                    left: `${currentTimelineInteraction.buttonProps.left}`,
+                                                    top: `${currentTimelineInteraction.buttonProps.top}`,
+                                                    width: `${currentTimelineInteraction.buttonProps.width}`,
+                                                    height: `${currentTimelineInteraction.buttonProps.height}`,
+                                                }}>
+                                                {currentTimelineInteraction.imgHref && (
+                                                    <img src={currentTimelineInteraction.imgHref} alt={`${currentTimelineInteraction.id}_img`} />
+                                                )}
+                                            </button>
+                                        )
+
+                                    }
+                                </>)
+                        }
+
+                        {
+                            (!isVideoStarted &&
+                                !currentInteraction && !isDrawing) && (
+                                <button
+                                    type="button"
+                                    className={`flex align__center justify__center ${styles.playButton}`}
+                                    onClick={handlePlayClick}
+                                >
+                                    <img src={getImage('play-filled.png')} alt="Play" />
+                                </button>
+                            )
+                        }
+                    </>
                 )}
 
                 <video
@@ -590,7 +795,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                     onClick={handlePlayClick}
                 />
             </div>
-        </div>
+        </div >
     )
 }
 

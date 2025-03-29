@@ -59,7 +59,10 @@ const Editor: React.FC = () => {
                     endTime: buttonTimestamp.endTime!,
                     value: 'button',
                     title: '',
-                    icon: faHandPointUp
+                    icon: faHandPointUp,
+                    styles: styleColorData || [],
+                    buttonProps: buttonProps || [],
+                    pauseDuration:selectedPause.value
                 })
             }
         },
@@ -75,7 +78,10 @@ const Editor: React.FC = () => {
                 endTime: hotspotTimestamp.endTime!,
                 value: 'hotspot',
                 title: '',
-                icon: faSun
+                icon: faSun,
+                styles: styleColorData || [],
+                buttonProps: buttonProps || [],
+                pauseDuration:selectedPause.value
             })
         },
         {
@@ -90,7 +96,10 @@ const Editor: React.FC = () => {
                 endTime: hotspotTimestamp.endTime!,
                 value: 'image',
                 title: '',
-                icon: faImage
+                icon: faImage,
+                styles: styleColorData || [],
+                buttonProps: buttonProps || [],
+                pauseDuration:selectedPause.value
             })
         },
         {
@@ -105,7 +114,10 @@ const Editor: React.FC = () => {
                 endTime: hotspotTimestamp.endTime!,
                 value: 'text',
                 title: '',
-                icon: faFont
+                icon: faFont,
+                styles: styleColorData || [],
+                buttonProps: buttonProps || [],
+                pauseDuration:selectedPause.value
             })
         },
         {
@@ -365,7 +377,10 @@ const Editor: React.FC = () => {
             value: interaction.value,
             isPause: interaction.isPause,
             title: interaction.title,
-            icon: faHandPointUp
+            icon: faHandPointUp,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -377,7 +392,10 @@ const Editor: React.FC = () => {
             value: interaction.value,
             isPause: interaction.isPause,
             title: interaction.title,
-            icon: faSun
+            icon: faSun,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -389,7 +407,10 @@ const Editor: React.FC = () => {
             value: interaction.value,
             isPause: interaction.isPause,
             title: interaction.title,
-            icon: faFont
+            icon: faFont,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -401,7 +422,10 @@ const Editor: React.FC = () => {
             value: interaction.value,
             isPause: interaction.isPause,
             title: interaction.title,
-            icon: faImage
+            icon: faImage,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -417,7 +441,10 @@ const Editor: React.FC = () => {
             isPause: interaction.isPause,
             value: interaction.value,
             title: interaction.title,
-            icon: faHandPointUp
+            icon: faHandPointUp,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -429,7 +456,10 @@ const Editor: React.FC = () => {
             isPause: interaction.isPause,
             value: interaction.value,
             title: interaction.title,
-            icon: faSun
+            icon: faSun,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -441,7 +471,10 @@ const Editor: React.FC = () => {
             isPause: interaction.isPause,
             value: interaction.value,
             title: interaction.title,
-            icon: faFont
+            icon: faFont,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -453,7 +486,10 @@ const Editor: React.FC = () => {
             isPause: interaction.isPause,
             value: interaction.value,
             title: interaction.title,
-            icon: faImage
+            icon: faImage,
+            styles: interaction.styles || [],
+            buttonProps: interaction.buttonProps || [],
+            pauseDuration:interaction.pauseDuration
         })
     }
 
@@ -467,7 +503,9 @@ const Editor: React.FC = () => {
                 title: interaction.title,
                 icon: interaction.icon,
                 type: interaction.type,
-                tooltip: interaction.tooltip
+                tooltip: interaction.tooltip,
+                endTime: interaction.endTime!,
+                isPause:false
             });
             setNewComment('')
         } else {
@@ -867,7 +905,10 @@ const Editor: React.FC = () => {
                         id: Number(new Date()),
                         tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
                         type: 'Button',
-                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
+                        endTime: buttonTimestamp.endTime!,
+                        isPause:currentInteraction.isPause,
+                        pauseDuration:selectedPause.value
                     })
                 } else if (currentInteraction?.value === 'hotspot') {
                     handleAddInteraction({
@@ -877,7 +918,10 @@ const Editor: React.FC = () => {
                         id: Number(new Date()),
                         tooltip: `Hotspot that shows at ${hotspotTimestamp.startTime} and hides at ${hotspotTimestamp.endTime}`,
                         type: 'Hotspot',
-                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
+                        endTime: hotspotTimestamp.endTime!,
+                        isPause:currentInteraction.isPause,
+                        pauseDuration:selectedPause.value
                     })
                 } else if (currentInteraction?.value === 'text') {
                     handleAddInteraction({
@@ -885,9 +929,12 @@ const Editor: React.FC = () => {
                         duration: String(textTimestamp.startTime),
                         icon: currentInteraction.icon,
                         id: Number(new Date()),
-                        tooltip: `Hotspot that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                        tooltip: `Text that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
                         type: 'Text',
-                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                        types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
+                        endTime: textTimestamp.endTime!,
+                        isPause:currentInteraction.isPause,
+                        pauseDuration:selectedPause.value
                     })
                 }
 
@@ -895,12 +942,15 @@ const Editor: React.FC = () => {
             } else if (currentInteraction?.value === 'image') {
                 handleAddInteraction({
                     title: currentInteraction.title,
-                    duration: String(textTimestamp.startTime),
+                    duration: String(imageTimestamp.startTime),
                     icon: currentInteraction.icon,
                     id: Number(new Date()),
-                    tooltip: `Image that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                    tooltip: `Image that shows at ${imageTimestamp.startTime} and hides at ${imageTimestamp.endTime}`,
                     type: 'Image',
-                    types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }]
+                    types: [{ background: 'rgba(40, 40, 118, 0.1)', color: 'black', id: Number(new Date()), title: `Open link: ${linkToOpen}` }],
+                    endTime: imageTimestamp.endTime!,
+                    isPause:currentInteraction.isPause,
+                    pauseDuration:selectedPause.value
                 })
 
                 handleDiscardChanges(isAddAnother)
@@ -917,7 +967,10 @@ const Editor: React.FC = () => {
                     tooltip: `Hotspot that shows at ${hotspotTimestamp.startTime} and hides at ${hotspotTimestamp.endTime}`,
                     type: 'Hotspot',
                     buttonProps: buttonProps,
-                    styles: styleColorData
+                    styles: styleColorData,
+                    endTime: hotspotTimestamp.endTime!,
+                    isPause:currentInteraction.isPause,
+                    pauseDuration:selectedPause.value
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.value === 'text' && currentInteraction.title !== '') {
@@ -926,10 +979,13 @@ const Editor: React.FC = () => {
                     duration: String(textTimestamp.startTime),
                     icon: currentInteraction.icon,
                     id: Number(new Date()),
-                    tooltip: `Button that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
+                    tooltip: `Text that shows at ${textTimestamp.startTime} and hides at ${textTimestamp.endTime}`,
                     type: 'Text',
                     buttonProps: buttonProps,
-                    styles: styleColorData
+                    styles: styleColorData,
+                    endTime: textTimestamp.endTime!,
+                    isPause:currentInteraction.isPause,
+                    pauseDuration:selectedPause.value
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.title !== '' && currentInteraction?.value === 'button') {
@@ -941,7 +997,10 @@ const Editor: React.FC = () => {
                     tooltip: `Button that shows at ${buttonTimestamp.startTime} and hides at ${buttonTimestamp.endTime}`,
                     type: 'Button',
                     buttonProps: buttonProps,
-                    styles: styleColorData
+                    styles: styleColorData,
+                    endTime: buttonTimestamp.endTime!,
+                    isPause:currentInteraction.isPause,
+                    pauseDuration:selectedPause.value
                 })
                 handleDiscardChanges(isAddAnother)
             } else if (currentInteraction?.value === 'image' && selectedImage) {
@@ -953,7 +1012,10 @@ const Editor: React.FC = () => {
                     tooltip: `Image that shows at ${imageTimestamp.startTime} and hides at ${imageTimestamp.endTime}`,
                     type: 'Image',
                     buttonProps: buttonProps,
-                    styles: styleColorData
+                    styles: styleColorData,
+                    endTime: imageTimestamp.endTime!,
+                    isPause:currentInteraction.isPause,
+                    pauseDuration:selectedPause.value
                 })
 
                 handleDiscardChanges(isAddAnother)
@@ -1385,7 +1447,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} />
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} interactionsData={interactionData} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {

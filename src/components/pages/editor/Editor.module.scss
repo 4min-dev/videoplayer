@@ -385,6 +385,7 @@
 
     &.fullScreen {
         overflow-y: hidden;
+        max-width: 100%;
     }
 
     .videoControlsPanel {

@@ -1,0 +1,16 @@
+.timelineMarker {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: rgb(27, 155, 243);
+    border:2px solid white;
+    border-radius: 1000px;
+    cursor: pointer;
+    z-index: 520;
+
+    &.hovered {
+        padding:4px;
+    }
+}

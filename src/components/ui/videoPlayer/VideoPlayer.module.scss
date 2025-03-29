@@ -96,69 +96,78 @@
         }
 
         .draggableImage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: none;
-            width: 100%;
-            height: 100%;
             cursor: move;
-            z-index: 2;
-            background:none;
-            border: 3px solid rgb(27, 155, 243);
-
-            img {
-                object-fit: fill !important;
-            }
         }
 
         .draggableText {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: none;
-            width: 100%;
-            height: 100%;
             cursor: move;
-            z-index: 2;
         }
 
         .draggableHotspot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            aspect-ratio: 1 / 1;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            width: 100%;
-            height: 100%;
             cursor: move;
-            z-index: 2;
         }
 
         .draggableButton {
-            position: relative;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 2em;
-            border: 0.2em solid;
-            will-change: box-shadow;
-            -webkit-box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
-            box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
-            padding: 0px 16px;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: move;
-            z-index: 2;
         }
+    }
+
+    .draggableImage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: none;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        background: none;
+        border: 3px solid rgb(27, 155, 243);
+
+        img {
+            object-fit: fill !important;
+        }
+    }
+
+    .draggableText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: none;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .draggableHotspot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        aspect-ratio: 1 / 1;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .draggableButton {
+        position: absolute;
+        border-radius: 2em;
+        border: 0.2em solid;
+        will-change: box-shadow;
+        -webkit-box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
+        box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
+        padding: 0px 16px;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
     }
 
     .playButton {
@@ -209,15 +218,36 @@
 
         .newComment {
             position: absolute;
-            top:0;
-            left:0;
-            font-size:28px;
+            top: 0;
+            left: 0;
+            font-size: 28px;
             color: rgb(255, 255, 255);
             line-height: 1.25em;
             font-weight: bold;
             background: rgba(0, 0, 0, 0.75);
             padding: 0.3em 0.5em;
             z-index: 50;
+        }
+    }
+
+    .pauseDurationLineWrapper {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 10px;
+        background-color: rgba(27, 155, 243, .3);
+
+        .pauseDurationLine {
+            width: 100%;
+            height: 10px;
+            background-color: rgb(27, 155, 243);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            transition: all .3s;
+            clip-path: inset(0 calc(50% - var(--line-width-percentage) / 2) 0 calc(50% - var(--line-width-percentage) / 2));
         }
     }
 }

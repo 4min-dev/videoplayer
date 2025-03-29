@@ -11,6 +11,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import IButtonTimestamp from '../../../../../interfaces/IButtonTimestamp'
 import IInteraction from '../../../../../interfaces/IInteraction'
+import { TimelineMarker } from '../timelineMarker/TimelineMarker'
+import ICurrentInteraction from '../../../../../interfaces/ICurrentInteraction'
 
 type TVideoPlayerPanel = {
     isVideoPaused: boolean
@@ -23,7 +25,10 @@ type TVideoPlayerPanel = {
     handleChangeAddComment: (event: React.ChangeEvent<HTMLInputElement>) => void,
     handleAddCommentInteraction: (interaction: IInteraction) => void,
     commentTimestamp: IButtonTimestamp,
-    newComment: string
+    newComment: string,
+    interactionsData: IInteraction[],
+    handleSetCurrentTimelineInteraction: (interaction: ICurrentInteraction) => void,
+    handleRemoveCurrentTimelineInteraction:(interactionId:number) => void
 }
 
 const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
@@ -37,7 +42,10 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     handleChangeAddComment,
     handleAddCommentInteraction,
     commentTimestamp,
-    newComment
+    interactionsData,
+    newComment,
+    handleSetCurrentTimelineInteraction,
+    handleRemoveCurrentTimelineInteraction
 }) => {
     const [isMuteHovered, setIsMuteHovered] = useState<boolean>(false)
     const [isMuted, setIsMuted] = useState<boolean>(false)
@@ -241,6 +249,74 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
         })
     }, [playBack])
 
+    useEffect(() => {
+        if (!videoRef.current) return;
+
+        const handleTimeUpdate = () => {
+            const currentTime = videoRef.current?.currentTime;
+
+            if(!currentTime) return
+
+            interactionsData.forEach((interaction) => {
+                const interactionStartTimeInSeconds = timeToSeconds(interaction.duration);
+                const interactionEndTimeInSeconds = timeToSeconds(interaction.endTime);
+
+                console.log(currentTime)
+                console.log(interactionStartTimeInSeconds)
+                console.log(interactionEndTimeInSeconds)
+
+                // Проверяем, находится ли текущее время в диапазоне интерактива
+                if (
+                    currentTime >= interactionStartTimeInSeconds &&
+                    currentTime <= interactionEndTimeInSeconds
+                ) {
+                    // Добавляем интерактив в массив
+                    handleSetCurrentTimelineInteraction({
+                        id: interaction.id,
+                        endTime: interaction.endTime,
+                        icon: interaction.icon,
+                        isPause: interaction.isPause,
+                        pauseDuration:interaction.pauseDuration,
+                        startTime: interaction.duration,
+                        title: interaction.title,
+                        value: interaction.type.toLowerCase(),
+                        imgHref: interaction.imgHref,
+                        styles:interaction.styles || [],
+                        buttonProps:interaction.buttonProps! || []
+                    });
+                } else {
+                    // Удаляем интерактив из массива, если время вышло за пределы
+                    handleRemoveCurrentTimelineInteraction(interaction.id);
+                }
+            });
+        };
+
+        videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
+
+        return () => {
+            videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
+        };
+    }, [interactionsData]);
+    const timeToSeconds = (time: string): number => {
+        const [minutes, seconds] = time.split(':').map(Number);
+        return minutes * 60 + seconds;
+    };
+
+    const markers = interactionsData.map((interaction) => {
+        const markerTimeInSeconds = timeToSeconds(interaction.duration)
+        const markerPosition = (markerTimeInSeconds / timeToSeconds(playBack.total)) * 100
+
+        return (
+            <TimelineMarker
+                key={interaction.id}
+                leftPosition={markerPosition}
+                type={interaction.type}
+                icon={interaction.icon}
+                isHovered={isTooltipVisible}
+            />
+        )
+    })
+
     return (
         <div className={`flex column ${styles.videoPlayerPanel}`}>
             <div
@@ -255,6 +331,7 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                     className={styles.videoPlayerTimeline}
                     style={{ width: `${progress}%` }}
                 ></div>
+                {markers}
                 {isTooltipVisible && (
                     <div
                         className={`${styles.tooltip} ${isFullscreen ? styles.fullScreen : ''}`}
@@ -327,7 +404,9 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                                 title: newComment,
                                 icon: faComment,
                                 type: 'Comment',
-                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${commentTimestamp.endTime}`
+                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${commentTimestamp.endTime}`,
+                                endTime: '00:17',
+                                isPause:false
                             })
                         }
                     }}
