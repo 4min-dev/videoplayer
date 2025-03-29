@@ -125,7 +125,10 @@ const Editor: React.FC = () => {
         {
             id: 1,
             icon: faPen,
-            handler: () => setDrawing((prev) => !prev),
+            handler: () => {
+                setDrawing((prev) => !prev)
+                setMorePopup(false)
+            },
             title: 'Drawing'
         }
     ])

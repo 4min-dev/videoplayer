@@ -43,7 +43,7 @@ const EditorVideoOverlay: React.FC<TEditorVideoOverlay> = ({ videoUrl, handleFul
     <div className={`flex column align__center ${styles.editorVideoOverlay} ${isFullscreen ? styles.fullScreen : ''}`}>
       <VideoPlayer currentInteraction={currentInteraction} videoUrl={videoUrl} playVideo={playVideo} pauseVideo={pauseVideo} videoRef={videoRef} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} setButtonProps={setButtonProps} buttonProps={buttonProps} buttonStyle={buttonStyle} isDrawing={isDrawing} newComment={newComment}/>
       {
-        !currentInteraction && <VideoPlayerPanel isVideoPaused={isVideoPaused} playVideo={playVideo} pauseVideo={pauseVideo} videoRef={videoRef} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} handleSetTimestampButton={handleSetTimestampButton} handleChangeAddComment={handleChangeAddComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} newComment={newComment}/>
+        (!currentInteraction && isVideoStarted) && <VideoPlayerPanel isVideoPaused={isVideoPaused} playVideo={playVideo} pauseVideo={pauseVideo} videoRef={videoRef} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} handleSetTimestampButton={handleSetTimestampButton} handleChangeAddComment={handleChangeAddComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} newComment={newComment}/>
       }
     </div>
   )

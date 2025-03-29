@@ -19,7 +19,7 @@ type TVideoPlayer = {
     buttonProps: { left: string | null, top: string | null, width: string | null, height: string | null, bottom: string | null },
     buttonStyle: IStyleColor[],
     isDrawing: boolean,
-    newComment:string
+    newComment: string
 }
 
 const VideoPlayer: React.FC<TVideoPlayer> = ({
@@ -304,6 +304,9 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
     }, [buttonPosition, buttonSize])
 
     const handlePlayClick = () => {
+
+        if (currentInteraction) return
+
         if (!isVideoStarted) {
             setVideoStarted(true)
             if (videoRef.current) {
@@ -334,13 +337,26 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         if (!videoRef.current) {
             return
         }
+
         videoRef.current.muted = true
+
+        if (!currentInteraction && isDrawing && !isVideoStarted) {
+            setVideoStarted(true)
+            videoRef.current.muted = false
+            playVideo(videoRef.current)
+        }
+
+
         if (!currentInteraction) {
+            if (isVideoStarted) {
+                videoRef.current.muted = false
+            }
+
             videoRef.current.play()
         } else {
             videoRef.current.pause()
         }
-    }, [currentInteraction])
+    }, [currentInteraction, isDrawing])
 
     const handleColorChange = (color: any) => {
         setDrawingColor(color.hex)
@@ -355,7 +371,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                 {
                     newComment !== '' && (
                         <span className={styles.newComment}>
-                           {newComment}
+                            {newComment}
                         </span>
                     )
                 }
@@ -552,8 +568,8 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                         ></div>
                     </div>
                 ) : (
-                    !isVideoStarted &&
-                    !currentInteraction && (
+                    (!isVideoStarted &&
+                        !currentInteraction && !isDrawing) && (
                         <button
                             type="button"
                             className={`flex align__center justify__center ${styles.playButton}`}
