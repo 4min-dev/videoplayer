@@ -6,6 +6,11 @@
     min-width: 35vw;
     max-width: 35vw;
     overflow-y: scroll;
+
+    @media (max-width:1024px) {
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 
 .asidePanel::-webkit-scrollbar {

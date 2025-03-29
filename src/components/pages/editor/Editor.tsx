@@ -17,6 +17,8 @@ import IButtonProps from '../../../interfaces/IButtonProps'
 import InteractionCard from './InteractionCard'
 import IButtonTimestamp from '../../../interfaces/IButtonTimestamp'
 import playVideo from '../../../assets/playVideo'
+import convertToTimeString from '../../../assets/convertToTimeString'
+import convertToSeconds from '../../../assets/convertToSeconds'
 
 type TControlButton = {
     id: number,
@@ -76,7 +78,7 @@ const Editor: React.FC = () => {
                             buttonProps: buttonProps || [],
                             pauseDuration: selectedPause.value
                         })
-                    }, 200);
+                    }, 200)
                 }
             }
         },
@@ -93,18 +95,18 @@ const Editor: React.FC = () => {
 
                 setTimeout(() => {
                     handleAddNewHotspot({
-                    id: Date.now(),
-                    isPause: false,
-                    startTime: hotspotTimestamp.startTime!,
-                    endTime: hotspotTimestamp.endTime!,
-                    value: 'hotspot',
-                    title: '',
-                    icon: faSun,
-                    styles: styleColorData || [],
-                    buttonProps: buttonProps || [],
-                    pauseDuration: selectedPause.value
-                })
-                },200)
+                        id: Date.now(),
+                        isPause: false,
+                        startTime: hotspotTimestamp.startTime!,
+                        endTime: hotspotTimestamp.endTime!,
+                        value: 'hotspot',
+                        title: '',
+                        icon: faSun,
+                        styles: styleColorData || [],
+                        buttonProps: buttonProps || [],
+                        pauseDuration: selectedPause.value
+                    })
+                }, 200)
             }
         },
         {
@@ -117,22 +119,22 @@ const Editor: React.FC = () => {
                     setVideoStarted(true)
                     playVideo(videoRef.current!, setIsVideoPaused)
                 }
-                
+
                 setTimeout(() => {
                     handleAddNewImage({
-                    id: Date.now(),
-                    isPause: false,
-                    startTime: hotspotTimestamp.startTime!,
-                    endTime: hotspotTimestamp.endTime!,
-                    value: 'image',
-                    title: '',
-                    icon: faImage,
-                    styles: styleColorData || [],
-                    buttonProps: buttonProps || [],
-                    pauseDuration: selectedPause.value,
-                    imgHref: selectedImage!
-                })
-                },200)
+                        id: Date.now(),
+                        isPause: false,
+                        startTime: hotspotTimestamp.startTime!,
+                        endTime: hotspotTimestamp.endTime!,
+                        value: 'image',
+                        title: '',
+                        icon: faImage,
+                        styles: styleColorData || [],
+                        buttonProps: buttonProps || [],
+                        pauseDuration: selectedPause.value,
+                        imgHref: selectedImage!
+                    })
+                }, 200)
             }
         },
         {
@@ -145,21 +147,21 @@ const Editor: React.FC = () => {
                     setVideoStarted(true)
                     playVideo(videoRef.current!, setIsVideoPaused)
                 }
-                
-               setTimeout(() => {
-                 handleAddNewText({
-                    id: Date.now(),
-                    isPause: false,
-                    startTime: hotspotTimestamp.startTime!,
-                    endTime: hotspotTimestamp.endTime!,
-                    value: 'text',
-                    title: '',
-                    icon: faFont,
-                    styles: styleColorData || [],
-                    buttonProps: buttonProps || [],
-                    pauseDuration: selectedPause.value
-                })
-               },200)
+
+                setTimeout(() => {
+                    handleAddNewText({
+                        id: Date.now(),
+                        isPause: false,
+                        startTime: hotspotTimestamp.startTime!,
+                        endTime: hotspotTimestamp.endTime!,
+                        value: 'text',
+                        title: '',
+                        icon: faFont,
+                        styles: styleColorData || [],
+                        buttonProps: buttonProps || [],
+                        pauseDuration: selectedPause.value
+                    })
+                }, 200)
             }
         },
         {
@@ -474,13 +476,13 @@ const Editor: React.FC = () => {
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
             pauseDuration: interaction.pauseDuration,
-            imgHref:interaction.imgHref,
+            imgHref: interaction.imgHref,
             clickHandler: interaction.clickHandler
         })
     }
 
     function handleAddComment(interaction: IInteraction) {
-        setInteractions([...interactionData, interaction]);
+        setInteractions([...interactionData, interaction])
     }
 
     function handleAddNewButton(interaction: ICurrentInteraction) {
@@ -543,7 +545,7 @@ const Editor: React.FC = () => {
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
             pauseDuration: interaction.pauseDuration,
-            imgHref:interaction.imgHref,
+            imgHref: interaction.imgHref,
             clickHandler: interaction.clickHandler
         })
     }
@@ -562,7 +564,7 @@ const Editor: React.FC = () => {
                 endTime: interaction.endTime!,
                 isPause: false,
                 clickHandler: () => ''
-            });
+            })
             setNewComment('')
         } else {
             alert('Please, fill comment field')
@@ -881,17 +883,6 @@ const Editor: React.FC = () => {
         }
     }
 
-    function convertToSeconds(time: string): number {
-        const [minutes, seconds] = time.split(':').map(Number)
-        return minutes * 60 + seconds
-    }
-
-    function convertToTimeString(seconds: number): string {
-        const minutes = Math.floor(seconds / 60)
-        const remainingSeconds = seconds % 60
-        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
-    }
-
     function handleSelectorClick() {
         setIsActionSelector((prev) => !prev)
     }
@@ -907,7 +898,7 @@ const Editor: React.FC = () => {
         }
     }
 
-    const handleColorChange = (id: number, newColor: string | { r: number; g: number; b: number; a: number }) => {
+    const handleColorChange = (id: number, newColor: string | { r: number, g: number, b: number, a: number }) => {
         setStyleColorData((prevData) =>
             prevData.map((item) =>
                 item.id === id ? { ...item, value: newColor } : item
@@ -1017,7 +1008,7 @@ const Editor: React.FC = () => {
                     pauseDuration: selectedPause.value,
                     buttonProps: buttonProps,
                     styles: styleColorData,
-                    imgHref:currentInteraction.imgHref,
+                    imgHref: currentInteraction.imgHref,
                     clickHandler: () => window.location.href = linkToOpen
                 })
 
@@ -1087,7 +1078,7 @@ const Editor: React.FC = () => {
                     endTime: imageTimestamp.endTime!,
                     isPause: currentInteraction.isPause,
                     pauseDuration: selectedPause.value,
-                    imgHref:currentInteraction.imgHref,
+                    imgHref: currentInteraction.imgHref,
                     clickHandler: currentInteraction.clickHandler!
                 })
 
@@ -1193,10 +1184,37 @@ const Editor: React.FC = () => {
     }
 
     return (
-        <div className={`flex justify__space__between`}>
+        <div className={`flex justify__space__between ${styles.editorContainer}`}>
             {
                 !isFullscreen && <Aside>
                     <div className={`flex column ${styles.asidePanelHeadingContainer}`}>
+
+                        {
+                            (!currentInteraction && isVideoStarted) && (
+                                <div className={`flex column ${styles.adaptiveCommentInputContainer}`}>
+                                    <input value={newComment} type='text' className={styles.adaptiveCommentInput} placeholder='Type to add comment' onChange={handleChangeAddComment} />
+                                    {
+                                        newComment &&
+                                        <button type='button' className={styles.adaptiveSaveCommentButton} onClick={() => {
+                                            handleAddCommentInteraction({
+                                                id: Date.now(),
+                                                duration: commentTimestamp.startTime!,
+                                                title: newComment,
+                                                icon: faComment,
+                                                type: 'Comment',
+                                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${convertToTimeString(convertToSeconds(commentTimestamp.startTime!) + 3)}`,
+                                                endTime: convertToTimeString(convertToSeconds(commentTimestamp.startTime!) + 3),
+                                                isPause: false,
+                                                clickHandler: () => ''
+                                            })
+                                        }}>
+                                            Save
+                                        </button>
+                                    }
+                                </div>
+                            )
+                        }
+
                         <div className={`flex align__center justify__center ${styles.asidePanelTitleContainer}`}>
                             {
                                 <>
@@ -1463,7 +1481,7 @@ const Editor: React.FC = () => {
                                                                                 g: color.rgb.g,
                                                                                 b: color.rgb.b,
                                                                                 a: color.rgb.a || 1,
-                                                                            });
+                                                                            })
                                                                         }}
                                                                     />
                                                                 </div>

@@ -31,6 +31,10 @@
             pointer-events: none;
             top: calc(70% - 20px);
 
+            @media (max-width:1024px) {
+                display: none;
+            }
+
             &.fullScreen {
                 top: calc(90% - 20px);
             }
@@ -61,6 +65,11 @@
                 background-color: #fff;
                 content: '';
                 display: inline-block;
+
+                @media (max-width:1024px) {
+                    width: 22px;
+                    height: 22px;
+                }
             }
         }
     }
@@ -77,13 +86,29 @@
             background: none;
         }
 
+        @media (max-width:1024px) {
+            svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
         .videoPlayterTimelineControlButtons {
             gap: 24px;
+
+            @media (max-width:1024px) {
+                gap:14px;
+            }
 
             .muteButtonContainer {
                 width: 36px;
                 overflow: hidden;
                 gap: 26px;
+
+                @media (max-width:1024px) {
+                    width:fit-content;
+                    gap:13px;
+                }
 
                 &.hovered {
                     width: fit-content;
@@ -98,6 +123,10 @@
                 font-size: 1.2em;
                 font-weight: bold;
                 vertical-align: top;
+
+                @media (max-width:1024px) {
+                    font-size: 0.9em;
+                }
             }
 
             .soundLineContainer {
@@ -147,6 +176,10 @@
             outline: none;
             background: none;
             color: white;
+
+            @media (max-width:1024px) {
+                display: none;
+            }
 
             &::placeholder {
                 font-size: inherit;

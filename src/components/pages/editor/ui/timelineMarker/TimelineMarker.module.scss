@@ -10,6 +10,11 @@
     cursor: pointer;
     z-index: 520;
 
+    @media (max-width:1024px) {
+        width: 16px;
+        height: 16px;
+    }
+
     &.hovered {
         padding:4px;
     }

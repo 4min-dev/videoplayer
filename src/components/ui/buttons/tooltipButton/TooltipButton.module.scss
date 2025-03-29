@@ -71,6 +71,10 @@
         white-space: nowrap;
         transition: opacity .2s;
 
+        @media (max-width:1024px) {
+            display: none;
+        }
+
         &.visible {
             opacity: 1;
         }

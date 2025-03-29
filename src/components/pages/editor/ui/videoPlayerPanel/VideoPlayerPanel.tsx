@@ -13,6 +13,8 @@ import IButtonTimestamp from '../../../../../interfaces/IButtonTimestamp'
 import IInteraction from '../../../../../interfaces/IInteraction'
 import { TimelineMarker } from '../timelineMarker/TimelineMarker'
 import ICurrentInteraction from '../../../../../interfaces/ICurrentInteraction'
+import convertToTimeString from '../../../../../assets/convertToTimeString'
+import convertToSeconds from '../../../../../assets/convertToSeconds'
 
 type TVideoPlayerPanel = {
     isVideoPaused: boolean
@@ -204,19 +206,20 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
         setIsDragging(true)
     }
 
-    const handleMouseSoundMove = (e: MouseEvent) => {
+    const handleMouseSoundMove = (e: MouseEvent | TouchEvent) => {
         if (!isDragging) return
-
+    
         const wrapper = document.querySelector(`.${styles.soundLineContainer}`) as HTMLDivElement
         if (!wrapper) return
-
+    
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    
         const rect = wrapper.getBoundingClientRect()
-        const clickPosition = e.clientX - rect.left
+        const clickPosition = clientX - rect.left
         const newVolume = Math.min(Math.max(clickPosition / rect.width, 0), 1)
-
+    
         setVolume(newVolume)
     }
-
     const handleMouseSoundUp = () => {
         setIsDragging(false)
     }
@@ -224,15 +227,21 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
     useEffect(() => {
         if (isDragging) {
             document.addEventListener('mousemove', handleMouseSoundMove)
+            document.addEventListener('touchmove', handleMouseSoundMove)
             document.addEventListener('mouseup', handleMouseSoundUp)
+            document.addEventListener('touchend', handleMouseSoundUp)
         } else {
             document.removeEventListener('mousemove', handleMouseSoundMove)
+            document.removeEventListener('touchmove', handleMouseSoundMove)
             document.removeEventListener('mouseup', handleMouseSoundUp)
+            document.removeEventListener('touchend', handleMouseSoundUp)
         }
-
+    
         return () => {
             document.removeEventListener('mousemove', handleMouseSoundMove)
+            document.removeEventListener('touchmove', handleMouseSoundMove)
             document.removeEventListener('mouseup', handleMouseSoundUp)
+            document.removeEventListener('touchend', handleMouseSoundUp)
         }
     }, [isDragging])
 
@@ -258,8 +267,8 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
             if(!currentTime) return
 
             interactionsData.forEach((interaction) => {
-                const interactionStartTimeInSeconds = timeToSeconds(interaction.duration);
-                const interactionEndTimeInSeconds = timeToSeconds(interaction.endTime);
+                const interactionStartTimeInSeconds = timeToSeconds(interaction.duration)
+                const interactionEndTimeInSeconds = timeToSeconds(interaction.endTime)
 
                 console.log(currentTime)
                 console.log(interactionStartTimeInSeconds)
@@ -376,6 +385,7 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                                 <div
                                     className={styles.soundLineControlCorner}
                                     onMouseDown={handleMouseSoundDown}
+                                    onTouchStart={handleMouseSoundDown}
                                 ></div>
                             </div>
                         </div>
@@ -402,8 +412,8 @@ const VideoPlayerPanel: React.FC<TVideoPlayerPanel> = ({
                                 title: newComment,
                                 icon: faComment,
                                 type: 'Comment',
-                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${commentTimestamp.endTime}`,
-                                endTime: '00:17',
+                                tooltip: `Comment that shows at ${commentTimestamp.startTime} and hides at ${convertToTimeString(convertToSeconds(commentTimestamp.startTime!) + 3)}`,
+                                endTime: convertToTimeString(convertToSeconds(commentTimestamp.startTime!) + 3),
                                 isPause:false,
                                 clickHandler:() => ''
                             })

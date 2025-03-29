@@ -6,6 +6,7 @@ import useDebounce from '../../../hooks/useDebounce'
 import IStyleColor from '../../../interfaces/IStyleColor'
 import rgbaToString from '../../../assets/rgbaToString'
 import { ChromePicker } from 'react-color'
+import isMobileDevice from '../../../assets/isMobileDevice'
 
 type TVideoPlayer = {
     currentInteraction: ICurrentInteraction,
@@ -81,31 +82,47 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
         }
     }, [])
 
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!isDrawing) return
-        const canvas = canvasRef.current
+    const getCoordinates = (
+        e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+    ): { clientX: number, clientY: number } => {
+        if ('touches' in e) {
+            const touch = e.touches[0]
+            return { clientX: touch.clientX, clientY: touch.clientY }
+        } else {
+            return { clientX: e.clientX, clientY: e.clientY }
+        }
+    }
 
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        if (!isDrawing) return
+
+        const canvas = canvasRef.current
         if (!canvas || !drawingContext.current) return
 
         initializeCanvas()
 
         const rect = canvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
+        const { clientX, clientY } = getCoordinates(e)
+
+        const x = clientX - rect.left
+        const y = clientY - rect.top
 
         drawingContext.current.beginPath()
         drawingContext.current.moveTo(x, y)
         isDrawingActive.current = true
     }
 
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         if (!isDrawing || !isDrawingActive.current) return
+
         const canvas = canvasRef.current
         if (!canvas || !drawingContext.current) return
 
         const rect = canvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
+        const { clientX, clientY } = getCoordinates(e)
+
+        const x = clientX - rect.left
+        const y = clientY - rect.top
 
         drawingContext.current.lineTo(x, y)
         drawingContext.current.stroke()
@@ -113,6 +130,7 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
 
     const stopDrawing = () => {
         if (!isDrawing) return
+
         if (drawingContext.current) {
             drawingContext.current.closePath()
         }
@@ -141,6 +159,9 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
 
     const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
         e.preventDefault()
+        if (isMobileDevice()) {
+            document.body.style.overflowY = 'hidden'
+        }
 
         const initialX = 'touches' in e ? e.touches[0].clientX : e.clientX
         const initialY = 'touches' in e ? e.touches[0].clientY : e.clientY
@@ -167,6 +188,9 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
             window.removeEventListener('touchmove', moveHandler as any)
             window.removeEventListener('mouseup', stopHandler)
             window.removeEventListener('touchend', stopHandler)
+            if (isMobileDevice()) {
+                document.body.style.overflowY = 'auto'
+            }
         }
 
         window.addEventListener('mousemove', moveHandler as any)
@@ -479,6 +503,9 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
                     onMouseLeave={stopDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDrawing}
                 />
                 {
                     isDrawing && (
@@ -664,6 +691,16 @@ const VideoPlayer: React.FC<TVideoPlayer> = ({
                             (currentTimelineInteractions.length > 0) &&
                             currentTimelineInteractions.map((currentTimelineInteraction) =>
                                 <>
+                                    {
+                                        currentTimelineInteraction && currentTimelineInteraction.value === 'comment' && (
+
+                                            <span className={styles.newComment}>
+                                                {currentTimelineInteraction.title}
+                                            </span>
+                                        )
+                                            
+                                    }
+
                                     {currentTimelineInteraction && currentTimelineInteraction.value === 'button' && (
                                         <button
                                             ref={buttonRef}
