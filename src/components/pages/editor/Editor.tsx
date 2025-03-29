@@ -85,54 +85,82 @@ const Editor: React.FC = () => {
             icon: faSun,
             title: 'Hotspot',
             hint: 'Add Hotspot',
-            handler: () => handleAddNewHotspot({
-                id: Date.now(),
-                isPause: false,
-                startTime: hotspotTimestamp.startTime!,
-                endTime: hotspotTimestamp.endTime!,
-                value: 'hotspot',
-                title: '',
-                icon: faSun,
-                styles: styleColorData || [],
-                buttonProps: buttonProps || [],
-                pauseDuration: selectedPause.value
-            })
+            handler: () => {
+                if (!isVideoStarted) {
+                    setVideoStarted(true)
+                    playVideo(videoRef.current!, setIsVideoPaused)
+                }
+
+                setTimeout(() => {
+                    handleAddNewHotspot({
+                    id: Date.now(),
+                    isPause: false,
+                    startTime: hotspotTimestamp.startTime!,
+                    endTime: hotspotTimestamp.endTime!,
+                    value: 'hotspot',
+                    title: '',
+                    icon: faSun,
+                    styles: styleColorData || [],
+                    buttonProps: buttonProps || [],
+                    pauseDuration: selectedPause.value
+                })
+                },200)
+            }
         },
         {
             id: 3,
             icon: faImage,
             title: 'Image',
             hint: 'Add Image',
-            handler: () => handleAddNewImage({
-                id: Date.now(),
-                isPause: false,
-                startTime: hotspotTimestamp.startTime!,
-                endTime: hotspotTimestamp.endTime!,
-                value: 'image',
-                title: '',
-                icon: faImage,
-                styles: styleColorData || [],
-                buttonProps: buttonProps || [],
-                pauseDuration: selectedPause.value
-            })
+            handler: () => {
+                if (!isVideoStarted) {
+                    setVideoStarted(true)
+                    playVideo(videoRef.current!, setIsVideoPaused)
+                }
+                
+                setTimeout(() => {
+                    handleAddNewImage({
+                    id: Date.now(),
+                    isPause: false,
+                    startTime: hotspotTimestamp.startTime!,
+                    endTime: hotspotTimestamp.endTime!,
+                    value: 'image',
+                    title: '',
+                    icon: faImage,
+                    styles: styleColorData || [],
+                    buttonProps: buttonProps || [],
+                    pauseDuration: selectedPause.value,
+                    imgHref: selectedImage!
+                })
+                },200)
+            }
         },
         {
             id: 4,
             icon: faFont,
             title: 'Text',
             hint: 'Add Text',
-            handler: () => handleAddNewText({
-                id: Date.now(),
-                isPause: false,
-                startTime: hotspotTimestamp.startTime!,
-                endTime: hotspotTimestamp.endTime!,
-                value: 'text',
-                title: '',
-                icon: faFont,
-                styles: styleColorData || [],
-                buttonProps: buttonProps || [],
-                pauseDuration: selectedPause.value
-            })
+            handler: () => {
+                if (!isVideoStarted) {
+                    setVideoStarted(true)
+                    playVideo(videoRef.current!, setIsVideoPaused)
+                }
+                
+               setTimeout(() => {
+                 handleAddNewText({
+                    id: Date.now(),
+                    isPause: false,
+                    startTime: hotspotTimestamp.startTime!,
+                    endTime: hotspotTimestamp.endTime!,
+                    value: 'text',
+                    title: '',
+                    icon: faFont,
+                    styles: styleColorData || [],
+                    buttonProps: buttonProps || [],
+                    pauseDuration: selectedPause.value
+                })
+               },200)
+            }
         },
         {
             id: 5,
@@ -446,6 +474,7 @@ const Editor: React.FC = () => {
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
             pauseDuration: interaction.pauseDuration,
+            imgHref:interaction.imgHref,
             clickHandler: interaction.clickHandler
         })
     }
@@ -514,6 +543,7 @@ const Editor: React.FC = () => {
             styles: interaction.styles || [],
             buttonProps: interaction.buttonProps || [],
             pauseDuration: interaction.pauseDuration,
+            imgHref:interaction.imgHref,
             clickHandler: interaction.clickHandler
         })
     }
@@ -987,6 +1017,7 @@ const Editor: React.FC = () => {
                     pauseDuration: selectedPause.value,
                     buttonProps: buttonProps,
                     styles: styleColorData,
+                    imgHref:currentInteraction.imgHref,
                     clickHandler: () => window.location.href = linkToOpen
                 })
 
@@ -1056,6 +1087,7 @@ const Editor: React.FC = () => {
                     endTime: imageTimestamp.endTime!,
                     isPause: currentInteraction.isPause,
                     pauseDuration: selectedPause.value,
+                    imgHref:currentInteraction.imgHref,
                     clickHandler: currentInteraction.clickHandler!
                 })
 
@@ -1487,7 +1519,7 @@ const Editor: React.FC = () => {
                 </Aside>
             }
             <div className={`flex column ${styles.editorVideoWrapper} ${isFullscreen ? styles.fullScreen : ''}`}>
-                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} interactionsData={interactionData} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} isVideoPaused={isVideoPaused} setIsVideoPaused={setIsVideoPaused} videoRef={videoRef}/>
+                <EditorVideoOverlay videoUrl={videoUrl !== null ? videoUrl : ''} handleFullscreenToggle={handleFullscreenToggle} isFullscreen={isFullscreen} currentInteraction={currentInteraction!} setButtonProps={setButtonProps} buttonProps={buttonProps} handleSetTimestampButton={handleSetTimestampButton} buttonStyle={styleColorData} isDrawing={isDrawing} handleChangeAddComment={handleChangeAddComment} newComment={newComment} handleAddCommentInteraction={handleAddCommentInteraction} commentTimestamp={commentTimestamp} interactionsData={interactionData} isVideoStarted={isVideoStarted} setVideoStarted={setVideoStarted} isVideoPaused={isVideoPaused} setIsVideoPaused={setIsVideoPaused} videoRef={videoRef} />
                 {
                     !isFullscreen && <div className={`flex ${styles.videoControlsPanel}`}>
                         {
